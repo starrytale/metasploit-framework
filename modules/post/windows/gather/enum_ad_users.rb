@@ -1,12 +1,9 @@
 ##
-# This module requires Metasploit: http://metasploit.com/download
+# This module requires Metasploit: https://metasploit.com/download
 # Current source: https://github.com/rapid7/metasploit-framework
 ##
 
-require 'rex'
-require 'msf/core'
-
-class Metasploit3 < Msf::Post
+class MetasploitModule < Msf::Post
   include Msf::Auxiliary::Report
   include Msf::Post::Windows::LDAP
   include Msf::Post::Windows::Accounts
@@ -47,6 +44,7 @@ class Metasploit3 < Msf::Post
       OptBool.new('EXCLUDE_LOCKED', [true, 'Exclude in search locked accounts..', false]),
       OptBool.new('EXCLUDE_DISABLED', [true, 'Exclude from search disabled accounts.', false]),
       OptString.new('ADDITIONAL_FIELDS', [false, 'Additional fields to retrieve, comma separated', nil]),
+      OptString.new('FILTER', [false, 'Customised LDAP filter', nil]),
       OptString.new('GROUP_MEMBER', [false, 'Recursively list users that are effectve members of the group DN specified.', nil]),
       OptEnum.new('UAC', [true, 'Filter on User Account Control Setting.', 'ANY',
                           [
@@ -57,7 +55,7 @@ class Metasploit3 < Msf::Post
                             'SMARTCARD_REQUIRED',
                             'NEVER_LOGGEDON'
                           ]])
-    ], self.class)
+    ])
   end
 
   def run
@@ -86,7 +84,7 @@ class Metasploit3 < Msf::Post
 
       if datastore['STORE_LOOT']
         stored_path = store_loot('ad.users', 'text/plain', session, results_table.to_csv)
-        print_status("Results saved to: #{stored_path}")
+        print_good("Results saved to: #{stored_path}")
       end
     end
   end
@@ -104,12 +102,12 @@ class Metasploit3 < Msf::Post
   # the database.
   #
   # @param [Array<Array<Hash>>] the LDAP query results to parse
-  # @return [Rex::Ui::Text::Table] the table containing all the result data
+  # @return [Rex::Text::Table] the table containing all the result data
   def parse_results(results)
     domain = datastore['DOMAIN'] || get_domain
     domain_ip = client.net.resolve.resolve_host(domain)[:ip]
     # Results table holds raw string data
-    results_table = Rex::Ui::Text::Table.new(
+    results_table = Rex::Text::Table.new(
       'Header'     => "Domain Users",
       'Indent'     => 1,
       'SortIndex'  => -1,
@@ -146,6 +144,7 @@ class Metasploit3 < Msf::Post
     inner_filter << '(!(lockoutTime>=1))' if datastore['EXCLUDE_LOCKED']
     inner_filter << '(!(userAccountControl:1.2.840.113556.1.4.803:=2))' if datastore['EXCLUDE_DISABLED']
     inner_filter << "(memberof:1.2.840.113556.1.4.1941:=#{datastore['GROUP_MEMBER']})" if datastore['GROUP_MEMBER']
+    inner_filter << "(#{datastore['FILTER']})" if datastore['FILTER'] != ""
     case datastore['UAC']
       when 'ANY'
       when 'NO_PASSWORD'

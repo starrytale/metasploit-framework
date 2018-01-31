@@ -1,12 +1,9 @@
 ##
-# This module requires Metasploit: http://metasploit.com/download
+# This module requires Metasploit: https://metasploit.com/download
 # Current source: https://github.com/rapid7/metasploit-framework
 ##
 
-require 'msf/core'
-
-class Metasploit3 < Msf::Auxiliary
-
+class MetasploitModule < Msf::Auxiliary
   include Msf::Exploit::Remote::HttpClient
   include Msf::Auxiliary::Report
 
@@ -31,7 +28,7 @@ class Metasploit3 < Msf::Auxiliary
         OptString.new('TARGETURI', [true, 'Path to list all the databases', '/db']),
         OptString.new('USERNAME', [true, 'The username to login as', 'root']),
         OptString.new('PASSWORD', [true, 'The password to login with', 'root'])
-      ], self.class)
+      ])
   end
 
   def run
@@ -41,29 +38,29 @@ class Metasploit3 < Msf::Auxiliary
         'method'        => 'GET'
       )
     rescue ::Errno::EPIPE, ::Timeout::Error, ::EOFError, ::IOError => e
-      print_error("#{peer} - The following Error was encountered: #{e.class}")
+      print_error("The following Error was encountered: #{e.class}")
       return
     end
 
     unless res
-      print_error("#{peer} - Server did not respond in an expected way.")
+      print_error("Server did not respond in an expected way.")
       return
     end
 
     if res.code == 401 && res.body =~ /Invalid username\/password/
-      print_error("#{peer} - Failed to authenticate. Invalid username/password.")
+      print_error("Failed to authenticate. Invalid username/password.")
       return
     elsif res.code == 200 && res.headers.include?('X-Influxdb-Version') && res.body.length > 0
-      print_status("#{peer} - Enumerating...")
+      print_status("Enumerating...")
       begin
         temp = JSON.parse(res.body)
         if temp.blank?
-          print_status("#{peer} - Json data is empty")
+          print_status("Json data is empty")
           return
         end
         results = JSON.pretty_generate(temp)
       rescue JSON::ParserError
-        print_error("#{peer} - Unable to parse JSON data.")
+        print_error("Unable to parse JSON data.")
         return
       end
       print_good("Found:\n\n#{results}\n")
@@ -74,9 +71,9 @@ class Metasploit3 < Msf::Auxiliary
         results,
         'InfluxDB Enum'
       )
-      print_good("#{peer} - File saved in: #{path}")
+      print_good("File saved in: #{path}")
     else
-      print_error("#{peer} - Unable to enum, received \"#{res.code}\"")
+      print_error("Unable to enum, received \"#{res.code}\"")
     end
   end
 end

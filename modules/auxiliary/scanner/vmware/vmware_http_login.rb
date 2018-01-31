@@ -1,14 +1,11 @@
 ##
-# This module requires Metasploit: http://metasploit.com/download
+# This module requires Metasploit: https://metasploit.com/download
 # Current source: https://github.com/rapid7/metasploit-framework
 ##
 
-
-require 'msf/core'
 require 'rex/proto/ntlm/message'
 
-
-class Metasploit3 < Msf::Auxiliary
+class MetasploitModule < Msf::Auxiliary
   include Msf::Exploit::Remote::VIMSoap
   include Msf::Exploit::Remote::HttpClient
   include Msf::Auxiliary::Report
@@ -25,16 +22,15 @@ class Metasploit3 < Msf::Auxiliary
         [
           [ 'CVE', '1999-0502'] # Weak password
         ],
-      'License'        => MSF_LICENSE
+      'License'        => MSF_LICENSE,
+      'DefaultOptions' => { 'SSL' => true }
     )
 
     register_options(
       [
         OptString.new('URI', [true, "The default URI to login with", "/sdk"]),
         Opt::RPORT(443)
-      ], self.class)
-
-    register_advanced_options([OptBool.new('SSL', [ false, 'Negotiate SSL for outgoing connections', true]),])
+      ])
   end
 
   def report_cred(opts)

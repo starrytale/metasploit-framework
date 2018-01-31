@@ -1,4 +1,5 @@
 # -*- coding: binary -*-
+require 'cgi'
 require 'uri'
 require 'rex/proto/http'
 require 'nokogiri'
@@ -84,6 +85,18 @@ class Response < Packet
     return cookies.strip
   end
 
+  #
+  # Gets cookies from the Set-Cookie header in a parsed format
+  #
+  def get_cookies_parsed
+    if (self.headers.include?('Set-Cookie'))
+      ret = CGI::Cookie::parse(self.headers['Set-Cookie'])
+    else
+      ret = {}
+    end
+    ret
+  end
+
 
   # Returns a parsed HTML document.
   # Instead of using regexes to parse the HTML body, you should use this and use the Nokogiri API.
@@ -108,7 +121,7 @@ class Response < Packet
   #
   # @return [Hash]
   def get_json_document
-    json = []
+    json = {}
 
     begin
       json = JSON.parse(self.body)
@@ -225,6 +238,10 @@ class Response < Packet
   #
   attr_accessor :request
 
+  #
+  # Host address:port associated with this request/response
+  #
+  attr_accessor :peerinfo
 
   attr_accessor :code
   attr_accessor :message

@@ -1,5 +1,5 @@
 ##
-# This module requires Metasploit: http://metasploit.com/download
+# This module requires Metasploit: https://metasploit.com/download
 # Current source: https://github.com/rapid7/metasploit-framework
 ##
 
@@ -8,10 +8,7 @@
 # ipax, neriberto, flambaz, bperry, egypt, and sinn3r for help
 #
 
-require 'msf/core'
-
-class Metasploit3 < Msf::Auxiliary
-
+class MetasploitModule < Msf::Auxiliary
   include Msf::Auxiliary::Scanner
   include Msf::Auxiliary::Report
   include Msf::Exploit::Remote::HttpClient
@@ -47,7 +44,7 @@ class Metasploit3 < Msf::Auxiliary
         [
           ['CHECK',    {'Description' => 'Check for basic directory traversal'}],
           ['WRITABLE', {'Description' => 'Check if a traversal bug allows us to write anywhere'}],
-          ['DOWNLOAD', {'Description' => 'Attempt to download files after bruteforcing a trigger'}],
+          ['DOWNLOAD', {'Description' => 'Attempt to download files after brute forcing a trigger'}],
           ['PHPSOURCE', {'Description' => 'Attempt to retrieve php source code files'}]
         ],
       'DefaultAction'  => 'CHECK'
@@ -67,7 +64,7 @@ class Metasploit3 < Msf::Auxiliary
             'Wordlist file to brute force',
             File.join(Msf::Config.install_root, 'data', 'wordlists', 'sensitive_files.txt')
           ])
-      ], self.class)
+      ])
 
     register_advanced_options(
       [
@@ -75,15 +72,15 @@ class Metasploit3 < Msf::Auxiliary
         OptString.new('TRIGGER',   [false,'Trigger string. Ex: ../', '']),
         OptString.new('FILE',      [false, 'Default file to read for the fuzzing stage', '']),
         OptString.new('COOKIE',    [false, 'Cookie value to use when sending the requests', ''])
-      ], self.class)
+      ])
 
     deregister_options('RHOST')
   end
 
 
   # Avoids writing to datastore['METHOD'] directly
-  def method
-    @method || datastore['METHOD']
+  def http_method
+    @http_method || datastore['METHOD']
   end
 
   # Avoids writing to datastore['DATA'] directly
@@ -136,7 +133,7 @@ class Metasploit3 < Msf::Auxiliary
   def ini_request(uri)
     req = {}
 
-    case method
+    case http_method
     when 'GET'
       # Example: Say we have the following datastore['PATH']
       # '/test.php?page=1&id=3&note=whatever'
@@ -162,11 +159,11 @@ class Metasploit3 < Msf::Auxiliary
       this_path = uri
     end
 
-    req['method']     = method
+    req['method']     = http_method
     req['uri']        = this_path
     req['headers']    = {'Cookie'=>datastore['COOKIE']} if not datastore['COOKIE'].empty?
     req['data']       = data if not data.empty?
-    req['authorization'] = basic_auth(datastore['USERNAME'], datastore['PASSWORD'])
+    req['authorization'] = basic_auth(datastore['HttpUsername'], datastore['HttpPassword'])
 
     return req
   end
@@ -225,7 +222,7 @@ class Metasploit3 < Msf::Auxiliary
         :proof    => trigger,
         :name     => self.fullname,
         :category => "web",
-        :method   => method
+        :method   => http_method
       })
 
     else
@@ -289,9 +286,9 @@ class Metasploit3 < Msf::Auxiliary
   #
   def is_writable(trigger)
     # Modify some registered options for the PUT method
-    tmp_method = method
+    tmp_method = http_method
     tmp_data   = data
-    @method = 'PUT'
+    @http_method = 'PUT'
 
     if data.empty?
       unique_str = Rex::Text.rand_text_alpha(4) * 4
@@ -310,7 +307,7 @@ class Metasploit3 < Msf::Auxiliary
     send_request_cgi(req, 25)
 
     # Prepare request to read our file
-    @method = 'GET'
+    @http_method = 'GET'
     @data   = tmp_data
     req = ini_request(uri)
     vprint_status("Verifying upload...")
@@ -324,7 +321,7 @@ class Metasploit3 < Msf::Auxiliary
     end
 
     # Ah, don't forget to restore our method
-    @method = tmp_method
+    @http_method = tmp_method
   end
 
   #
@@ -337,8 +334,8 @@ class Metasploit3 < Msf::Auxiliary
 
   def run_host(ip)
     # Warn if it's not a well-formed UPPERCASE method
-    if method !~ /^[A-Z]+$/
-      print_warning("HTTP method #{method} is not Apache-compliant. Try only UPPERCASE letters.")
+    if http_method !~ /^[A-Z]+$/
+      print_warning("HTTP method #{http_method} is not Apache-compliant. Try only UPPERCASE letters.")
     end
     print_status("Running action: #{action.name}...")
 

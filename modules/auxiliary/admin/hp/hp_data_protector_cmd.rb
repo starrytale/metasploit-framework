@@ -1,12 +1,9 @@
 ##
-# This module requires Metasploit: http://metasploit.com/download
+# This module requires Metasploit: https://metasploit.com/download
 # Current source: https://github.com/rapid7/metasploit-framework
 ##
 
-require 'msf/core'
-
-class Metasploit3 < Msf::Auxiliary
-
+class MetasploitModule < Msf::Auxiliary
   include Msf::Exploit::Remote::Tcp
 
   def initialize(info = {})
@@ -50,7 +47,7 @@ class Metasploit3 < Msf::Auxiliary
       [
         Opt::RPORT(5555),
         OptString.new("CMD", [true, 'File to execute', 'Windows\System32\calc.exe'])
-      ], self.class)
+      ])
   end
 
 
@@ -92,5 +89,4 @@ class Metasploit3 < Msf::Auxiliary
       disconnect
     end
   end
-
 end

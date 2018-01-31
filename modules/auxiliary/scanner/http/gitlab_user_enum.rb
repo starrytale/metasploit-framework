@@ -1,13 +1,12 @@
 ##
-# This module requires Metasploit: http://metasploit.com/download
+# This module requires Metasploit: https://metasploit.com/download
 # Current source: https://github.com/rapid7/metasploit-framework
 ##
 
 require 'rex/proto/http'
-require 'msf/core'
 require 'json'
 
-class Metasploit3 < Msf::Auxiliary
+class MetasploitModule < Msf::Auxiliary
   include Msf::Exploit::Remote::HttpClient
   include Msf::Auxiliary::Scanner
   include Msf::Auxiliary::Report
@@ -37,7 +36,7 @@ class Metasploit3 < Msf::Auxiliary
         OptString.new('TARGETURI', [ true, 'Path to GitLab instance', '/']),
         OptInt.new('START_ID', [true, 'ID number to start from', 0]),
         OptInt.new('END_ID', [true, 'ID number to enumerate up to', 50])
-      ], self.class)
+      ])
   end
 
   def run_host(_ip)

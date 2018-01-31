@@ -1,12 +1,9 @@
 ##
-# This module requires Metasploit: http://metasploit.com/download
+# This module requires Metasploit: https://metasploit.com/download
 # Current source: https://github.com/rapid7/metasploit-framework
 ##
 
-require 'msf/core'
-
-class Metasploit3 < Msf::Auxiliary
-
+class MetasploitModule < Msf::Auxiliary
   include Msf::Exploit::Remote::HttpClient
   include Msf::Auxiliary::Report
 
@@ -22,7 +19,7 @@ class Metasploit3 < Msf::Auxiliary
         [
           [ 'OSVDB', '90733' ],
           [ 'BID', '58231' ],
-          [ 'URL', 'http://packetstormsecurity.com/files/120591/dlinkdir645-bypass.txt' ]
+          [ 'PACKETSTORM', '120591' ]
         ],
       'Author'      =>
         [
@@ -52,7 +49,6 @@ class Metasploit3 < Msf::Auxiliary
     }.merge(service_data)
 
     login_data = {
-      last_attempted_at: DateTime.now,
       core: create_credential(credential_data),
       status: Metasploit::Model::Login::Status::UNTRIED,
       proof: opts[:proof]

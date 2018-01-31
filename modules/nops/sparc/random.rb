@@ -1,11 +1,7 @@
 ##
-# This module requires Metasploit: http://metasploit.com/download
+# This module requires Metasploit: https://metasploit.com/download
 # Current source: https://github.com/rapid7/metasploit-framework
 ##
-
-
-require 'msf/core'
-
 
 ###
 #
@@ -15,7 +11,7 @@ require 'msf/core'
 # This class implements NOP generator for the SPARC platform
 #
 ###
-class Metasploit3 < Msf::Nop
+class MetasploitModule < Msf::Nop
 
   # Nop types
   InsSethi      = 0
@@ -83,7 +79,7 @@ class Metasploit3 < Msf::Nop
     register_advanced_options(
       [
         OptBool.new('RandomNops', [ false, "Generate a random NOP sled", true ])
-      ], self.class)
+      ])
   end
 
 
@@ -207,5 +203,4 @@ class Metasploit3 < Msf::Nop
       rand(len - 1) + 1
     ].pack('N')
   end
-
 end

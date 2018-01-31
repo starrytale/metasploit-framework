@@ -1,15 +1,11 @@
 ##
-# This module requires Metasploit: http://metasploit.com/download
+# This module requires Metasploit: https://metasploit.com/download
 # Current source: https://github.com/rapid7/metasploit-framework
 ##
 
 require 'rex/proto/http'
-require 'msf/core'
 
-
-
-class Metasploit3 < Msf::Auxiliary
-
+class MetasploitModule < Msf::Auxiliary
   include Msf::Exploit::Remote::HttpClient
   include Msf::Auxiliary::WmapScanFile
   include Msf::Auxiliary::Scanner
@@ -28,7 +24,7 @@ class Metasploit3 < Msf::Auxiliary
     register_options(
       [
         OptString.new('PATH', [ true,  "The path/file to identify backups", '/index.asp'])
-      ], self.class)
+      ])
 
   end
 
@@ -63,7 +59,7 @@ class Metasploit3 < Msf::Auxiliary
           }, 20)
 
       if (res and res.code >= 200 and res.code < 300)
-        print_status("Found #{wmap_base_url}#{file}")
+        print_good("Found #{wmap_base_url}#{file}")
 
         report_web_vuln(
           :host	=> ip,
@@ -92,5 +88,4 @@ class Metasploit3 < Msf::Auxiliary
 
 
   end
-
 end

@@ -1,12 +1,11 @@
 ##
-# This module requires Metasploit: http://metasploit.com/download
+# This module requires Metasploit: https://metasploit.com/download
 # Current source: https://github.com/rapid7/metasploit-framework
 ##
 
-require 'msf/core'
 require 'msf/core/handler/reverse_tcp'
 
-module Metasploit3
+module MetasploitModule
 
   CachedSize = 154
 
@@ -19,7 +18,7 @@ module Metasploit3
       'Author'      => 'nemo <nemo[at]felinemenace.org>',
       'License'     => MSF_LICENSE,
       'Platform'    => 'osx',
-      'Arch'        => ARCH_X86_64,
+      'Arch'        => ARCH_X64,
       'Handler'     => Msf::Handler::ReverseTcp,
       'Convention'  => 'sockedi',
       'Stager'      =>

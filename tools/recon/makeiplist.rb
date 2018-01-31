@@ -12,17 +12,16 @@
 # mubix
 #
 
-
 msfbase = __FILE__
 while File.symlink?(msfbase)
   msfbase = File.expand_path(File.readlink(msfbase), File.dirname(msfbase))
 end
 
 $:.unshift(File.expand_path(File.join(File.dirname(msfbase), '..', '..', 'lib')))
+
 require 'msfenv'
 require 'rex'
 require 'optparse'
-
 
 class OptsConsole
   def self.parse(args)
@@ -58,7 +57,7 @@ Usage: #{__FILE__} [options]|
         puts opts
         raise OptionParser::MissingArgument, "-i is a required option"
       end
-      unless ::File.exists?(options['input'])
+      unless ::File.exist?(options['input'])
         raise OptionParser::InvalidArgument, "Not found: #{options['input']}"
       end
     rescue OptionParser::InvalidOption
@@ -78,7 +77,6 @@ Usage: #{__FILE__} [options]|
   end
 end
 
-
 #
 # Prints IPs
 #
@@ -91,7 +89,6 @@ def make_list(in_f, out_f)
     end
 end
 
-
 #
 # Returns file handles
 #
@@ -99,13 +96,12 @@ def load_files(in_f, out_f)
   handle_in = ::File.open(in_f, 'r')
 
   # Output file not found, assuming we should create one automatically
-  ::File.open(out_f, 'w') {} unless ::File.exists?(out_f)
+  ::File.open(out_f, 'w') {} unless ::File.exist?(out_f)
 
   handle_out = ::File.open(out_f, 'a')
 
   return handle_in, handle_out
 end
-
 
 options = OptsConsole.parse(ARGV)
 in_f, out_f = load_files(options['input'], options['output'])

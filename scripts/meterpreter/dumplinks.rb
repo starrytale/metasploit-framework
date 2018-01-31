@@ -66,7 +66,6 @@ end
 def enum_users(os)
   users = []
   userinfo = {}
-  user = @client.sys.config.getuid
   userpath = nil
   useroffcpath = nil
   sysdrv = @client.sys.config.getenv('SystemDrive')
@@ -79,7 +78,7 @@ def enum_users(os)
     lnkpath = "\\Recent\\"
     officelnkpath = "\\Application Data\\Microsoft\\Office\\Recent\\"
   end
-  if user == "NT AUTHORITY\\SYSTEM"
+  if @client.sys.config.is_system?
     print_status("Running as SYSTEM extracting user list...")
     @client.fs.dir.foreach(userpath) do |u|
       next if u =~ /^(\.|\.\.|All Users|Default|Default User|Public|desktop.ini)$/
@@ -369,7 +368,7 @@ def get_time(lo_byte, hi_byte)
   end
   return time
 end
-if client.platform =~ /win32|win64/
+if client.platform == 'windows'
   enum_users(os).each do |user|
     if user['userpath']
       print_status "Extracting lnk files for user #{user['username']} at #{user['userpath']}..."

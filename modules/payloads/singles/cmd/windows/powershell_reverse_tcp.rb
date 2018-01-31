@@ -1,15 +1,14 @@
 ##
-# This module requires Metasploit: http://metasploit.com/download
+# This module requires Metasploit: https://metasploit.com/download
 # Current source: https://github.com/rapid7/metasploit-framework
 ##
 
-require 'msf/core'
 require 'msf/core/handler/reverse_tcp'
 require 'msf/base/sessions/powershell'
 require 'msf/core/payload/windows/powershell'
 require 'msf/core/handler/reverse_tcp_ssl'
 
-module Metasploit3
+module MetasploitModule
 
   CachedSize = 1526
 
@@ -45,11 +44,10 @@ module Metasploit3
       register_options(
       [
         OptString.new('LOAD_MODULES', [ false, "A list of powershell modules seperated by a comma to download over the web", nil ]),
-      ], self.class)
+      ])
   end
 
   def generate
     generate_powershell_code("Reverse")
   end
-
 end

@@ -42,7 +42,7 @@ module Shell
     # Set the stop flag to false
     self.stop_flag      = false
     self.disable_output = false
-    self.stop_count	    = 0
+    self.stop_count     = 0
 
     # Initialize the prompt
     self.init_prompt = prompt
@@ -57,7 +57,7 @@ module Shell
   def init_tab_complete
     if (self.input and self.input.supports_readline)
       self.input = Input::Readline.new(lambda { |str| tab_complete(str) })
-      if Readline::HISTORY.length == 0 and histfile and File.exists?(histfile)
+      if Readline::HISTORY.length == 0 and histfile and File.exist?(histfile)
         File.readlines(histfile).each { |e|
           Readline::HISTORY << e.chomp
         }
@@ -132,9 +132,10 @@ module Shell
         if framework
           if input.prompt.include?("%T")
             t = Time.now
-            if framework.datastore['PromptTimeFormat']
-              t = t.strftime(framework.datastore['PromptTimeFormat'])
-            end
+            # This %T is the strftime shorthand for %H:%M:%S
+            format = framework.datastore['PromptTimeFormat'] || "%T"
+            t = t.strftime(format)
+            # This %T is the marker in the prompt where we need to place the time
             input.prompt.gsub!(/%T/, t.to_s)
           end
 
@@ -184,7 +185,9 @@ module Shell
           self.init_prompt = input.prompt
         end
 
+        output.input = input
         line = input.pgets()
+        output.input = nil
         log_output(input.prompt)
 
         # If a block was passed in, pass the line to it.  If it returns true,
@@ -270,11 +273,14 @@ module Shell
   #
   def print_error(msg='')
     return if (output.nil?)
+    return if (msg.nil?)
 
     self.on_print_proc.call(msg) if self.on_print_proc
     # Errors are not subject to disabled output
     log_output(output.print_error(msg))
   end
+
+  alias_method :print_bad, :print_error
 
   #
   # Prints a status message to the output handle.

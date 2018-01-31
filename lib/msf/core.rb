@@ -10,12 +10,14 @@
 #
 ###
 
-# Sanity check this version of ruby
-require 'msf/sanity'
+# Include backported features for older versions of Ruby
+require 'backports'
 
 # The framework-core depends on Rex
 require 'rex'
 require 'rex/ui'
+require 'rex/arch'
+include Rex::Arch
 
 module Msf
   autoload :Author, 'msf/core/author'
@@ -66,11 +68,6 @@ require 'msf/core/exploit'
 require 'msf/core/nop'
 require 'msf/core/payload'
 require 'msf/core/post'
-
-# Custom HTTP Modules
-require 'msf/http/wordpress'
-require 'msf/http/typo3'
-require 'msf/http/jboss'
 
 # Drivers
 require 'msf/core/exploit_driver'

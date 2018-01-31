@@ -1,13 +1,11 @@
 ##
-# This module requires Metasploit: http://metasploit.com/download
+# This module requires Metasploit: https://metasploit.com/download
 # Current source: https://github.com/rapid7/metasploit-framework
 ##
 
 require 'rex/proto/http'
-require 'msf/core'
 
-class Metasploit3 < Msf::Auxiliary
-
+class MetasploitModule < Msf::Auxiliary
   include Msf::Exploit::Remote::HttpClient
   include Msf::Auxiliary::Report
   include Msf::Auxiliary::AuthBrute
@@ -24,15 +22,15 @@ class Metasploit3 < Msf::Auxiliary
         [
           'Karn Ganeshen <KarnGaneshen[at]gmail.com>',
         ],
-      'License'        => MSF_LICENSE
+      'License'        => MSF_LICENSE,
+      'DefaultOptions' => { 'SSL' => true }
     ))
 
     register_options(
       [
         Opt::RPORT(443),
-        OptBool.new('SSL', [ true, "Negotiate SSL for outgoing connections", true]),
         OptString.new('TARGETURI', [true, "URI for Web login. Default: /VPortal/mgtconsole/CheckPassword.jsp", "/VPortal/mgtconsole/CheckPassword.jsp"])
-      ], self.class)
+      ])
   end
 
   def run_host(ip)
@@ -136,5 +134,4 @@ class Metasploit3 < Msf::Auxiliary
       return :abort
     end
   end
-
 end

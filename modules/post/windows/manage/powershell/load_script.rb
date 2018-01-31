@@ -1,12 +1,9 @@
 ##
-# This module requires Metasploit: http://metasploit.com/download
+# This module requires Metasploit: https://metasploit.com/download
 # Current source: https://github.com/rapid7/metasploit-framework
 ##
 
-require 'msf/core'
-require 'rex'
-
-class Metasploit3 < Msf::Post
+class MetasploitModule < Msf::Post
   include Msf::Post::Windows::Powershell
 
   def initialize(info={})
@@ -30,7 +27,7 @@ class Metasploit3 < Msf::Post
       [
         OptPath.new( 'SCRIPT',  [false, 'Path to the local PS script', ::File.join(Msf::Config.install_root, "scripts", "ps", "msflag.ps1") ]),
         OptPath.new( 'FOLDER',  [false, 'Path to a local folder of PS scripts'])
-      ], self.class)
+      ])
 
   end
 
@@ -44,5 +41,4 @@ class Metasploit3 < Msf::Post
       files.each do |script| stage_psh_env(datastore['FOLDER'] + script) end
     end
   end
-
 end

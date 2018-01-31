@@ -1,15 +1,12 @@
 ##
-# This module requires Metasploit: http://metasploit.com/download
+# This module requires Metasploit: https://metasploit.com/download
 # Current source: https://github.com/rapid7/metasploit-framework
 ##
 
-
-require 'msf/core'
 require 'metasploit/framework/credential_collection'
 require 'metasploit/framework/login_scanner/mssql'
 
-class Metasploit3 < Msf::Auxiliary
-
+class MetasploitModule < Msf::Auxiliary
   include Msf::Exploit::Remote::MSSQL
   include Msf::Auxiliary::Report
   include Msf::Auxiliary::AuthBrute
@@ -31,6 +28,10 @@ class Metasploit3 < Msf::Auxiliary
 
   def run_host(ip)
     print_status("#{rhost}:#{rport} - MSSQL - Starting authentication scanner.")
+
+    if datastore['TDSENCRYPTION']
+      print_status("Manually enabled TLS/SSL to encrypt TDS payloads.")
+    end
 
     cred_collection = Metasploit::Framework::CredentialCollection.new(
         blank_passwords: datastore['BLANK_PASSWORDS'],
@@ -56,6 +57,7 @@ class Metasploit3 < Msf::Auxiliary
         max_send_size: datastore['TCP::max_send_size'],
         send_delay: datastore['TCP::send_delay'],
         windows_authentication: datastore['USE_WINDOWS_AUTHENT'],
+        tdsencryption: datastore['TDSENCRYPTION'],
         framework: framework,
         framework_module: self,
         ssl: datastore['SSL'],
@@ -77,12 +79,11 @@ class Metasploit3 < Msf::Auxiliary
         credential_data[:core] = credential_core
         create_credential_login(credential_data)
 
-        print_good "#{ip}:#{rport} - LOGIN SUCCESSFUL: #{result.credential}"
+        print_good "#{ip}:#{rport} - Login Successful: #{result.credential}"
       else
         invalidate_login(credential_data)
         vprint_error "#{ip}:#{rport} - LOGIN FAILED: #{result.credential} (#{result.status}: #{result.proof})"
       end
     end
   end
-
 end

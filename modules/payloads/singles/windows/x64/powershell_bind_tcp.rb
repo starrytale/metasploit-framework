@@ -1,9 +1,8 @@
 ##
-# This module requires Metasploit: http://metasploit.com/download
+# This module requires Metasploit: https://metasploit.com/download
 # Current source: https://github.com/rapid7/metasploit-framework
 ##
 
-require 'msf/core'
 require 'msf/core/payload/windows/exec_x64'
 require 'msf/core/payload/windows/powershell'
 require 'msf/base/sessions/powershell'
@@ -14,9 +13,9 @@ require 'msf/core/handler/bind_tcp'
 # Extends the Exec payload to add a new user.
 #
 ###
-module Metasploit3
+module MetasploitModule
 
-  CachedSize = 1786
+  CachedSize = 1518
 
   include Msf::Payload::Windows::Exec_x64
   include Rex::Powershell::Command
@@ -37,7 +36,7 @@ module Metasploit3
         ],
       'License'       => MSF_LICENSE,
       'Platform'      => 'win',
-      'Arch'          => ARCH_X86_64,
+      'Arch'          => ARCH_X64,
       'Handler'       => Msf::Handler::BindTcp,
       'Session'       => Msf::Sessions::PowerShell,
       ))
@@ -46,7 +45,7 @@ module Metasploit3
     register_options(
       [
         OptString.new('LOAD_MODULES', [ false, "A list of powershell modules seperated by a comma to download over the web", nil ]),
-      ], self.class)
+      ])
     # Hide the CMD option...this is kinda ugly
     deregister_options('CMD')
   end

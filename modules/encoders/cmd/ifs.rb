@@ -1,13 +1,9 @@
 ##
-# This module requires Metasploit: http://metasploit.com/download
+# This module requires Metasploit: https://metasploit.com/download
 # Current source: https://github.com/rapid7/metasploit-framework
 ##
 
-
-require 'msf/core'
-
-
-class Metasploit3 < Msf::Encoder
+class MetasploitModule < Msf::Encoder
 
   # Below normal ranking because this will produce incorrect code a lot of
   # the time.
@@ -44,5 +40,4 @@ class Metasploit3 < Msf::Encoder
     buf.gsub!(/\s/, '${IFS}')
     return buf
   end
-
 end

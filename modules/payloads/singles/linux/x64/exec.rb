@@ -1,12 +1,9 @@
 ##
-# This module requires Metasploit: http://metasploit.com/download
+# This module requires Metasploit: https://metasploit.com/download
 # Current source: https://github.com/rapid7/metasploit-framework
 ##
 
-
-require 'msf/core'
-
-module Metasploit3
+module MetasploitModule
 
   CachedSize = 47
 
@@ -20,12 +17,12 @@ module Metasploit3
       'Author'        => 'ricky',
       'License'       => MSF_LICENSE,
       'Platform'      => 'linux',
-      'Arch'          => ARCH_X86_64))
+      'Arch'          => ARCH_X64))
 
     register_options(
       [
         OptString.new('CMD',  [ true,  "The command string to execute" ]),
-      ], self.class)
+      ])
   end
 
   def generate_stage(opts={})

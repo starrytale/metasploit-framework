@@ -1,14 +1,13 @@
 ##
-# This module requires Metasploit: http://metasploit.com/download
+# This module requires Metasploit: https://metasploit.com/download
 # Current source: https://github.com/rapid7/metasploit-framework
 ##
 
-require 'msf/core'
 require 'msf/core/handler/reverse_tcp'
 require 'msf/base/sessions/command_shell'
 require 'msf/base/sessions/command_shell_options'
 
-module Metasploit3
+module MetasploitModule
 
   CachedSize = 105
 
@@ -24,7 +23,7 @@ module Metasploit3
       'References'    => ['URL', 'https://github.com/earthquake/shellcodes/blob/master/x86_64_bsd_ipv6_reverse_tcp.asm.c'],
       'License'       => MSF_LICENSE,
       'Platform'      => 'bsd',
-      'Arch'          => ARCH_X86_64,
+      'Arch'          => ARCH_X64,
       'Handler'       => Msf::Handler::ReverseTcp,
       'Session'       => Msf::Sessions::CommandShellUnix,
       'Payload'       =>
@@ -88,5 +87,4 @@ module Metasploit3
          OptInt.new('SCOPEID', [false, "IPv6 scope ID, for link-local addresses", 0])
       ])
   end
-
 end

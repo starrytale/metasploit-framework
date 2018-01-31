@@ -1,13 +1,9 @@
 ##
-# This module requires Metasploit: http://metasploit.com/download
+# This module requires Metasploit: https://metasploit.com/download
 # Current source: https://github.com/rapid7/metasploit-framework
 ##
 
-
-require 'msf/core'
-
-class Metasploit3 < Msf::Auxiliary
-
+class MetasploitModule < Msf::Auxiliary
   include Msf::Exploit::Remote::HttpClient
   include Msf::Auxiliary::Report
   include Msf::Auxiliary::Scanner
@@ -206,7 +202,6 @@ class Metasploit3 < Msf::Auxiliary
         service_name: 'dvr',
         user: user,
         password: password,
-        service_name: 'http',
         proof: "user_id: #{user_id}, active: #{active}"
       )
     }
@@ -268,5 +263,4 @@ class Metasploit3 < Msf::Auxiliary
     report_service(:host => rhost, :port => rport, :sname => 'dvr', :info => "DVR NAME: #{dvr_name}")
     print_good("#{rhost}:#{rport} DVR #{dvr_name} found")
   end
-
 end

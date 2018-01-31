@@ -1,12 +1,9 @@
 ##
-# This module requires Metasploit: http://metasploit.com/download
+# This module requires Metasploit: https://metasploit.com/download
 # Current source: https://github.com/rapid7/metasploit-framework
 ##
 
-require 'msf/core'
-
-class Metasploit4 < Msf::Auxiliary
-
+class MetasploitModule < Msf::Auxiliary
   include Msf::Exploit::Remote::HttpClient
   include Msf::Auxiliary::Report
   include Msf::Auxiliary::Scanner
@@ -37,8 +34,10 @@ class Metasploit4 < Msf::Auxiliary
         OptString.new('TARGETURI', [false, 'Path to the SAP Management Console ', '/']),
         OptPath.new('USER_FILE', [ false, "File containing users, one per line",
                                    File.join(Msf::Config.data_directory, "wordlists", "sap_common.txt") ])
-      ], self.class)
+      ])
     register_autofilter_ports([ 50013 ])
+
+    deregister_options('HttpUsername', 'HttpPassword')
   end
 
   def run_host(rhost)
@@ -95,7 +94,7 @@ class Metasploit4 < Msf::Auxiliary
       pass = pass.gsub("<SAPSID>", datastore["SAP_SID"])
     end
 
-    print_status("#{peer} - Trying username:'#{user}' password:'#{pass}'")
+    print_status("Trying username:'#{user}' password:'#{pass}'")
     success = false
 
     soapenv = 'http://schemas.xmlsoap.org/soap/envelope/'

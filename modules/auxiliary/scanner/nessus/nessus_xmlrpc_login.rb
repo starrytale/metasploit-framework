@@ -1,16 +1,9 @@
 ##
-# nessus_xmlrpc_login.rb
-##
-
-##
-# This module requires Metasploit: http://metasploit.com/download
+# This module requires Metasploit: https://metasploit.com/download
 # Current source: https://github.com/rapid7/metasploit-framework
 ##
 
-require 'msf/core'
-
-class Metasploit3 < Msf::Auxiliary
-
+class MetasploitModule < Msf::Auxiliary
   include Msf::Exploit::Remote::HttpClient
   include Msf::Auxiliary::Report
   include Msf::Auxiliary::AuthBrute
@@ -24,7 +17,8 @@ class Metasploit3 < Msf::Auxiliary
         specific user/pass.
       },
       'Author'         => [ 'Vlatko Kosturjak <kost[at]linux.hr>' ],
-      'License'        => MSF_LICENSE
+      'License'        => MSF_LICENSE,
+      'DefaultOptions' => { 'SSL' => true }
     )
 
     register_options(
@@ -32,12 +26,7 @@ class Metasploit3 < Msf::Auxiliary
         Opt::RPORT(8834),
         OptString.new('URI', [true, "URI for Nessus XMLRPC login. Default is /login", "/login"]),
         OptBool.new('BLANK_PASSWORDS', [false, "Try blank passwords for all users", false])
-      ], self.class)
-
-    register_advanced_options(
-    [
-      OptBool.new('SSL', [ true, "Negotiate SSL for outgoing connections", true])
-    ], self.class)
+      ])
   end
 
   def run_host(ip)
@@ -139,5 +128,4 @@ class Metasploit3 < Msf::Auxiliary
 
     create_credential_login(login_data)
   end
-
 end

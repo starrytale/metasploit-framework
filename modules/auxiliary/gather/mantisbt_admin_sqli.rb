@@ -1,12 +1,9 @@
 ##
-# This module requires Metasploit: http://metasploit.com/download
-## Current source: https://github.com/rapid7/metasploit-framework
-###
+# This module requires Metasploit: https://metasploit.com/download
+# Current source: https://github.com/rapid7/metasploit-framework
+##
 
-require 'msf/core'
-
-class Metasploit4 < Msf::Auxiliary
-
+class MetasploitModule < Msf::Auxiliary
   include Msf::Exploit::Remote::HttpClient
 
   def initialize(info={})
@@ -39,7 +36,7 @@ class Metasploit4 < Msf::Auxiliary
         OptString.new('USERNAME', [ true, 'Single username', 'administrator']),
         OptString.new('PASSWORD', [ true, 'Single password', 'root']),
         OptString.new('TARGETURI', [ true, 'Relative URI of MantisBT installation', '/'])
-      ], self.class)
+      ])
 
   end
 
@@ -99,5 +96,4 @@ class Metasploit4 < Msf::Auxiliary
       print_good("File saved to: #{path}")
     end
   end
-
 end

@@ -1,14 +1,11 @@
 ##
-# This module requires Metasploit: http://metasploit.com/download
+# This module requires Metasploit: https://metasploit.com/download
 # Current source: https://github.com/rapid7/metasploit-framework
 ##
 
-
-require 'msf/core'
 require 'yaml'
 
-
-class Metasploit3 < Msf::Auxiliary
+class MetasploitModule < Msf::Auxiliary
 
   #
   # This module sends email messages via smtp
@@ -37,7 +34,7 @@ class Metasploit3 < Msf::Auxiliary
           OptString.new('RPORT', [true, "SMTP server port",'25']),
           OptString.new('YAML_CONFIG', [true, "Full path to YAML Configuration file",
             File.join(Msf::Config.data_directory,"emailer_config.yaml")]),
-        ], self.class)
+        ])
 
     # Hide this option from the user
     deregister_options('MAILTO')
@@ -119,7 +116,6 @@ class Metasploit3 < Msf::Auxiliary
     datastore['MAILFROM'] = from
 
     msg       = load_file(msg_file)
-    email_sig = load_file(sig_file)
 
     if (type !~ /text/i and type !~ /text\/html/i)
       print_error("YAML config: #{type}")
@@ -221,5 +217,4 @@ class Metasploit3 < Msf::Auxiliary
 
     print_status("Email sent..")
   end
-
 end

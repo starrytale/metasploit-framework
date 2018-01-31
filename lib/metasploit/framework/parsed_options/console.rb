@@ -10,7 +10,7 @@ class Metasploit::Framework::ParsedOptions::Console < Metasploit::Framework::Par
 
         options.console.commands = []
         options.console.confirm_exit = false
-        options.console.defanged = false
+        options.console.histfile = nil
         options.console.local_output = nil
         options.console.plugins = []
         options.console.quiet = false
@@ -40,8 +40,8 @@ class Metasploit::Framework::ParsedOptions::Console < Metasploit::Framework::Par
           options.console.confirm_exit = true
         end
 
-        option_parser.on('-d', '--defanged', 'Execute the console as defanged') do
-          options.console.defanged = true
+        option_parser.on('-H', '--history-file FILE', 'Save command history to the specified file') do |file|
+          options.console.histfile = file
         end
 
         option_parser.on('-L', '--real-readline', 'Use the system Readline library instead of RbReadline') do

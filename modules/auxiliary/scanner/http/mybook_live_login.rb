@@ -1,13 +1,12 @@
 ##
-# This module requires Metasploit: http://metasploit.com/download
+# This module requires Metasploit: https://metasploit.com/download
 # Current source: https://github.com/rapid7/metasploit-framework
 ##
 
-require 'msf/core'
 require 'metasploit/framework/credential_collection'
 require 'metasploit/framework/login_scanner/mybook_live'
 
-class Metasploit3 < Msf::Auxiliary
+class MetasploitModule < Msf::Auxiliary
   include Msf::Auxiliary::Scanner
   include Msf::Exploit::Remote::HttpClient
   include Msf::Auxiliary::Report
@@ -24,7 +23,7 @@ class Metasploit3 < Msf::Auxiliary
     register_options(
       [
         Opt::RPORT(80)
-      ], self.class)
+      ])
 
     register_autofilter_ports([ 80 ])
 
@@ -60,6 +59,8 @@ class Metasploit3 < Msf::Auxiliary
         stop_on_success: datastore['STOP_ON_SUCCESS'],
         bruteforce_speed: datastore['BRUTEFORCE_SPEED'],
         connection_timeout: 10,
+        http_username: datastore['HttpUsername'],
+        http_password: datastore['HttpPassword']
       )
     )
 
@@ -74,10 +75,10 @@ class Metasploit3 < Msf::Auxiliary
         credential_data[:core] = credential_core
         create_credential_login(credential_data)
 
-        print_good "#{ip}:#{rport} - LOGIN SUCCESSFUL: #{result.credential}"
+        print_good "#{ip}:#{rport} - Login Successful: #{result.credential}"
       else
         invalidate_login(credential_data)
-        vprint_status "#{ip}:#{rport} - LOGIN FAILED: #{result.credential} (#{result.status})"
+        vprint_error "#{ip}:#{rport} - LOGIN FAILED: #{result.credential} (#{result.status})"
       end
     end
   end

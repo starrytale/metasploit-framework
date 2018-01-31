@@ -1,14 +1,11 @@
 ##
-# This module requires Metasploit: http://metasploit.com/download
+# This module requires Metasploit: https://metasploit.com/download
 # Current source: https://github.com/rapid7/metasploit-framework
 ##
 
-require 'msf/core'
-require 'rex'
 require 'sshkey'
 
-class Metasploit3 < Msf::Post
-
+class MetasploitModule < Msf::Post
   include Msf::Post::File
   include Msf::Post::Unix
 
@@ -86,5 +83,4 @@ class Metasploit3 < Msf::Post
 
     end
   end
-
 end

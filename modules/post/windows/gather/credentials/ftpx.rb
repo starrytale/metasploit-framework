@@ -1,14 +1,11 @@
 ##
-# This module requires Metasploit: http://metasploit.com/download
+# This module requires Metasploit: https://metasploit.com/download
 # Current source: https://github.com/rapid7/metasploit-framework
 ##
 
-
-require 'msf/core'
-require 'rex'
 require 'rexml/document'
 
-class Metasploit3 < Msf::Post
+class MetasploitModule < Msf::Post
   include Msf::Post::Windows::UserProfiles
 
   def initialize(info={})
@@ -100,5 +97,4 @@ class Metasploit3 < Msf::Post
       create_credential_login(login_data.merge(service_data))
     end
   end
-
 end

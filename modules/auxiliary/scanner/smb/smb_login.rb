@@ -1,14 +1,12 @@
 ##
-# This module requires Metasploit: http://metasploit.com/download
+# This module requires Metasploit: https://metasploit.com/download
 # Current source: https://github.com/rapid7/metasploit-framework
 ##
 
-require 'msf/core'
 require 'metasploit/framework/login_scanner/smb'
 require 'metasploit/framework/credential_collection'
 
-class Metasploit3 < Msf::Auxiliary
-
+class MetasploitModule < Msf::Auxiliary
   include Msf::Exploit::Remote::DCERPC
   include Msf::Exploit::Remote::SMB::Client
   include Msf::Exploit::Remote::SMB::Client::Authenticated
@@ -55,9 +53,11 @@ class Metasploit3 < Msf::Auxiliary
     register_options(
       [
         Opt::Proxies,
+        OptBool.new('ABORT_ON_LOCKOUT', [ true, "Abort the run when an account lockout is detected", false ]),
         OptBool.new('PRESERVE_DOMAINS', [ false, "Respect a username that contains a domain name.", true ]),
-        OptBool.new('RECORD_GUEST', [ false, "Record guest-privileged random logins to the database", false ])
-      ], self.class)
+        OptBool.new('RECORD_GUEST', [ false, "Record guest-privileged random logins to the database", false ]),
+        OptBool.new('DETECT_ANY_AUTH', [false, 'Enable detection of systems accepting any authentication', true])
+      ])
 
   end
 
@@ -69,32 +69,28 @@ class Metasploit3 < Msf::Auxiliary
     @scanner = Metasploit::Framework::LoginScanner::SMB.new(
       host: ip,
       port: rport,
+      local_port: datastore['CPORT'],
       stop_on_success: datastore['STOP_ON_SUCCESS'],
+      proxies: datastore['PROXIES'],
       bruteforce_speed: datastore['BRUTEFORCE_SPEED'],
       connection_timeout: 5,
       max_send_size: datastore['TCP::max_send_size'],
       send_delay: datastore['TCP::send_delay'],
       framework: framework,
       framework_module: self,
-      smb_verify_signature: datastore['SMB::VerifySignature'],
-      use_ntlmv2: datastore['NTLM::UseNTLMv2'],
-      use_ntlm2_session: datastore['NTLM::UseNTLM2_session'],
-      send_lm: datastore['NTLM::SendLM'],
-      use_lmkey: datastore['NTLM::UseLMKey'],
-      send_ntlm: datastore['NTLM::SendNTLM'],
-      smb_native_os: datastore['SMB::Native_OS'],
-      smb_native_lm: datastore['SMB::Native_LM'],
-      send_spn: datastore['NTLM::SendSPN'],
-      host: ip
     )
 
-    bogus_result = @scanner.attempt_bogus_login(domain)
-    if bogus_result.success?
-      if bogus_result.access_level == Metasploit::Framework::LoginScanner::SMB::AccessLevels::GUEST
-        print_status("#{ip} - This system allows guest sessions with any credentials")
+    if datastore['DETECT_ANY_AUTH']
+      bogus_result = @scanner.attempt_bogus_login(domain)
+      if bogus_result.success?
+        if bogus_result.access_level == Metasploit::Framework::LoginScanner::SMB::AccessLevels::GUEST
+          print_status("This system allows guest sessions with any credentials")
+        else
+          print_error("This system accepts authentication with any credentials, brute force is ineffective.")
+          return
+        end
       else
-        print_error("#{ip} - This system accepts authentication with any credentials, brute force is ineffective.")
-        return
+        vprint_status('This system does not accept authentication with any credentials, proceeding with brute force')
       end
     end
 
@@ -116,6 +112,14 @@ class Metasploit3 < Msf::Auxiliary
 
     @scanner.scan! do |result|
       case result.status
+      when Metasploit::Model::Login::Status::LOCKED_OUT
+        if datastore['ABORT_ON_LOCKOUT']
+          print_error("Account lockout detected on '#{result.credential.public}', aborting.")
+          return
+        else
+          print_error("Account lockout detected on '#{result.credential.public}', skipping this user.")
+        end
+
       when Metasploit::Model::Login::Status::DENIED_ACCESS
         print_brute :level => :status, :ip => ip, :msg => "Correct credentials, but unable to login: '#{result.credential}', #{result.proof}"
         report_creds(ip, rport, result)

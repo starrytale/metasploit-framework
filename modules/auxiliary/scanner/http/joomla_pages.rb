@@ -1,11 +1,9 @@
 ##
-# This module requires Metasploit: http://metasploit.com/download
+# This module requires Metasploit: https://metasploit.com/download
 # Current source: https://github.com/rapid7/metasploit-framework
 ##
-require 'msf/core'
 
-class Metasploit3 < Msf::Auxiliary
-
+class MetasploitModule < Msf::Auxiliary
   include Msf::Exploit::Remote::HttpClient
   include Msf::Auxiliary::Scanner
   include Msf::Auxiliary::Report
@@ -24,7 +22,7 @@ class Metasploit3 < Msf::Auxiliary
     register_options(
       [
         OptString.new('TARGETURI', [ true,  "The path to the Joomla install", '/'])
-      ], self.class)
+      ])
   end
 
   def run_host(ip)
@@ -42,7 +40,7 @@ class Metasploit3 < Msf::Auxiliary
       'htaccess.txt'
     ]
 
-    vprint_status("#{peer} - Checking for interesting pages")
+    vprint_status("Checking for interesting pages")
     pages.each do |page|
       scan_pages(tpath, page, ip)
     end
@@ -65,7 +63,7 @@ class Metasploit3 < Msf::Auxiliary
         note = "Registration Page"
       end
 
-      print_good("#{peer} - #{note}: #{tpath}#{page}")
+      print_good("#{note}: #{tpath}#{page}")
 
       report_note(
         :host  => ip,
@@ -90,14 +88,13 @@ class Metasploit3 < Msf::Auxiliary
     return
 
     rescue OpenSSL::SSL::SSLError
-      vprint_error("#{peer} - SSL error")
+      vprint_error("SSL error")
       return
     rescue Errno::ENOPROTOOPT, Errno::ECONNRESET, ::Rex::ConnectionRefused, ::Rex::HostUnreachable, ::Rex::ConnectionTimeout, ::ArgumentError
-      vprint_error("#{peer} - Unable to Connect")
+      vprint_error("Unable to Connect")
       return
     rescue ::Timeout::Error, ::Errno::EPIPE
-      vprint_error("#{peer} - Timeout error")
+      vprint_error("Timeout error")
       return
   end
-
 end

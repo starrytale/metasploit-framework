@@ -1,14 +1,12 @@
 ##
-# This module requires Metasploit: http://metasploit.com/download
+# This module requires Metasploit: https://metasploit.com/download
 # Current source: https://github.com/rapid7/metasploit-framework
 ##
 
-require 'msf/core'
 require 'metasploit/framework/login_scanner/pop3'
 require 'metasploit/framework/credential_collection'
 
-class Metasploit3 < Msf::Auxiliary
-
+class MetasploitModule < Msf::Auxiliary
   include Msf::Exploit::Remote::Tcp
   include Msf::Auxiliary::Scanner
   include Msf::Auxiliary::Report
@@ -44,7 +42,7 @@ class Metasploit3 < Msf::Auxiliary
           'The file that contains a list of probable passwords.',
           File.join(Msf::Config.install_root, 'data', 'wordlists', 'unix_passwords.txt')
         ])
-    ], self.class)
+    ])
   end
 
   def target
@@ -67,6 +65,7 @@ class Metasploit3 < Msf::Auxiliary
     scanner = Metasploit::Framework::LoginScanner::POP3.new(
       host: ip,
       port: rport,
+      proxies: datastore['PROXIES'],
       ssl: datastore['SSL'],
       cred_details: cred_collection,
       stop_on_success: datastore['STOP_ON_SUCCESS'],
@@ -75,7 +74,6 @@ class Metasploit3 < Msf::Auxiliary
       send_delay: datastore['TCP::send_delay'],
       framework: framework,
       framework_module: self,
-      ssl: datastore['SSL'],
       ssl_version: datastore['SSLVersion'],
       ssl_verify_mode: datastore['SSLVerifyMode'],
       ssl_cipher: datastore['SSLCipher'],

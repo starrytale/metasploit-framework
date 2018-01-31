@@ -27,7 +27,7 @@ module Msf::DBManager::Service
   def get_service(wspace, host, proto, port)
   ::ActiveRecord::Base.connection_pool.with_connection {
     host = get_host(:workspace => wspace, :address => host)
-    return if not host
+    return if !host
     return host.services.find_by_proto_and_port(proto, port)
   }
   end
@@ -43,9 +43,10 @@ module Msf::DBManager::Service
   # opts may contain
   # +:name+::  the application layer protocol (e.g. ssh, mssql, smb)
   # +:sname+:: an alias for the above
+  # +:workspace+:: the workspace for the service
   #
   def report_service(opts)
-    return if not active
+    return if !active
   ::ActiveRecord::Base.connection_pool.with_connection { |conn|
     addr  = opts.delete(:host) || return
     hname = opts.delete(:host_name)
@@ -91,7 +92,7 @@ module Msf::DBManager::Service
     opts.each { |k,v|
       if (service.attribute_names.include?(k.to_s))
         service[k] = ((v and k == :name) ? v.to_s.downcase : v)
-      else
+      elsif !v.blank?
         dlog("Unknown attribute for Service: #{k}")
       end
     }

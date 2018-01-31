@@ -1,13 +1,9 @@
 ##
-# This module requires Metasploit: http://metasploit.com/download
+# This module requires Metasploit: https://metasploit.com/download
 # Current source: https://github.com/rapid7/metasploit-framework
 ##
 
-
-require 'msf/core'
-
-
-class Metasploit3 < Msf::Auxiliary
+class MetasploitModule < Msf::Auxiliary
 
   # Exploit mixins should be called first
   include Msf::Exploit::Remote::DCERPC
@@ -33,7 +29,7 @@ class Metasploit3 < Msf::Auxiliary
     register_options(
       [
         Opt::RPORT(135)
-      ], self.class)
+      ])
   end
 
   # Obtain information about a single host
@@ -88,5 +84,4 @@ class Metasploit3 < Msf::Auxiliary
       print_error("Error: #{e}")
     end
   end
-
 end

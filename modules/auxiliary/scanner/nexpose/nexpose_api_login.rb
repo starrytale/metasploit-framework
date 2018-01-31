@@ -1,16 +1,9 @@
 ##
-# nexpose_api_login.rb
-##
-
-##
-# This module requires Metasploit: http://metasploit.com/download
+# This module requires Metasploit: https://metasploit.com/download
 # Current source: https://github.com/rapid7/metasploit-framework
 ##
 
-require 'msf/core'
-
-class Metasploit3 < Msf::Auxiliary
-
+class MetasploitModule < Msf::Auxiliary
   include Msf::Exploit::Remote::HttpClient
   include Msf::Auxiliary::Report
   include Msf::Auxiliary::AuthBrute
@@ -24,7 +17,8 @@ class Metasploit3 < Msf::Auxiliary
         specific user/pass.
       },
       'Author'         => [ 'Vlatko Kosturjak <kost[at]linux.hr>' ],
-      'License'        => MSF_LICENSE
+      'License'        => MSF_LICENSE,
+      'DefaultOptions' => { 'SSL' => true }
     )
 
     register_options(
@@ -32,12 +26,7 @@ class Metasploit3 < Msf::Auxiliary
         Opt::RPORT(3780),
         OptString.new('URI', [true, "URI for NeXpose API. Default is /api/1.1/xml", "/api/1.1/xml"]),
         OptBool.new('BLANK_PASSWORDS', [false, "Try blank passwords for all users", false])
-      ], self.class)
-
-    register_advanced_options(
-    [
-      OptBool.new('SSL', [ true, "Negotiate SSL for outgoing connections", true])
-    ], self.class)
+      ])
   end
 
   def run_host(ip)

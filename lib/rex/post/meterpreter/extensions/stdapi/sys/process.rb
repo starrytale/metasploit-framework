@@ -224,13 +224,15 @@ class Process < Rex::Post::Process
     response.each(TLV_TYPE_PROCESS_GROUP) { |p|
     arch = ""
 
-    pa = p.get_tlv_value( TLV_TYPE_PROCESS_ARCH )
-    if( pa != nil )
+    pa = p.get_tlv_value(TLV_TYPE_PROCESS_ARCH)
+    if !pa.nil?
       if pa == 1 # PROCESS_ARCH_X86
         arch = ARCH_X86
       elsif pa == 2 # PROCESS_ARCH_X64
-        arch = ARCH_X86_64
+        arch = ARCH_X64
       end
+    else
+      arch = p.get_tlv_value(TLV_TYPE_PROCESS_ARCH_NAME)
     end
 
     processes <<
@@ -285,11 +287,12 @@ class Process < Rex::Post::Process
         'thread' => Rex::Post::Meterpreter::Extensions::Stdapi::Sys::ProcessSubsystem::Thread.new(self),
       })
 
-    ObjectSpace.define_finalizer( self, self.class.finalize(self.client, self.handle) )
+    # Ensure the remote object is closed when all references are removed
+    ObjectSpace.define_finalizer(self, self.class.finalize(client, handle))
   end
 
-  def self.finalize(client,handle)
-    proc { self.close(client,handle) }
+  def self.finalize(client, handle)
+    proc { self.close(client, handle) }
   end
 
   #
@@ -320,8 +323,12 @@ class Process < Rex::Post::Process
   #
   # Instance method
   #
-  def close(handle=self.handle)
-    self.class.close(self.client, handle)
+  def close(handle = self.handle)
+    unless self.pid.nil?
+      ObjectSpace.undefine_finalizer(self)
+      self.class.close(self.client, handle)
+      self.pid = nil
+    end
   end
 
   #
@@ -372,46 +379,42 @@ end
 class ProcessList < Array
 
   #
-  # Create a Rex::Ui::Text::Table out of the processes stored in this list
+  # Create a Rex::Text::Table out of the processes stored in this list
   #
-  # +opts+ is passed on to Rex::Ui::Text::Table.new, mostly unmolested
+  # +opts+ is passed on to Rex::Text::Table.new, mostly unmolested
   #
   # Note that this output is affected by Rex::Post::Meterpreter::Client#unicode_filter_encode
   #
   def to_table(opts={})
     if empty?
-      return Rex::Ui::Text::Table.new(opts)
+      return Rex::Text::Table.new(opts)
     end
 
-    cols = [ "PID", "PPID", "Name", "Arch", "Session", "User", "Path" ]
-    # Arch and Session are specific to native Windows, PHP and Java can't do
-    # ppid.  Cut columns from the list if they aren't there.  It is conceivable
-    # that processes might have different columns, but for now assume that the
-    # first one is representative.
-    cols.delete_if { |c| !( first.has_key?(c.downcase) ) or first[c.downcase].nil? }
+    column_headers = [ "PID", "PPID", "Name", "Arch", "Session", "User", "Path" ]
+    column_headers.delete_if do |h|
+      none? { |process| process.has_key?(h.downcase) } ||
+      all? { |process| process[h.downcase].nil? }
+    end
 
     opts = {
       'Header' => 'Process List',
       'Indent' => 1,
-      'Columns' => cols
+      'Columns' => column_headers
     }.merge(opts)
 
-    tbl = Rex::Ui::Text::Table.new(opts)
-    each { |process|
-      tbl << cols.map { |c|
-        col = c.downcase
+    tbl = Rex::Text::Table.new(opts)
+    each do |process|
+      tbl << column_headers.map do |header|
+        col = header.downcase
+        next unless process.keys.any? { |process_header| process_header == col }
         val = process[col]
         if col == 'session'
           val == 0xFFFFFFFF ? '' : val.to_s
-        elsif col == 'arch'
-          # for display and consistency with payload naming we switch the internal
-          # 'x86_64' value to display 'x64'
-          val == ARCH_X86_64 ? 'x64' : val
         else
           val
         end
-      }.compact
-    }
+      end
+    end
 
     tbl
   end

@@ -1,13 +1,9 @@
 ##
-# This module requires Metasploit: http://metasploit.com/download
+# This module requires Metasploit: https://metasploit.com/download
 # Current source: https://github.com/rapid7/metasploit-framework
 ##
 
-require 'msf/core'
-require 'rex'
-
-class Metasploit3 < Msf::Post
-
+class MetasploitModule < Msf::Post
   include Msf::Post::File
 
   include Msf::Post::Windows::Registry
@@ -76,7 +72,7 @@ class Metasploit3 < Msf::Post
   end
 
   def list_computers(domain,hosts)
-    tbl = Rex::Ui::Text::Table.new(
+    tbl = Rex::Text::Table.new(
       'Header'  => "List of Domain Hosts for the primary Domain.",
       'Indent'  => 1,
       'Columns' =>

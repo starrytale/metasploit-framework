@@ -1,12 +1,9 @@
 ##
-# This module requires Metasploit: http://metasploit.com/download
+# This module requires Metasploit: https://metasploit.com/download
 # Current source: https://github.com/rapid7/metasploit-framework
 ##
 
-require 'msf/core'
-
-class Metasploit3 < Msf::Auxiliary
-
+class MetasploitModule < Msf::Auxiliary
   include Msf::Auxiliary::Report
   include Msf::Exploit::Remote::HttpClient
 
@@ -44,7 +41,7 @@ class Metasploit3 < Msf::Auxiliary
       [
         Opt::RPORT(80),
         OptString.new("TARGETURI", [true, 'Base path to ColdFusion', '/'])
-      ], self.class)
+      ])
   end
 
   def fingerprint(response)
@@ -203,7 +200,7 @@ class Metasploit3 < Msf::Auxiliary
     })
 
     if res.nil?
-      print_error("#{peer} - Unable to receive a response")
+      print_error("Unable to receive a response")
       return
     end
 
@@ -213,15 +210,15 @@ class Metasploit3 < Msf::Auxiliary
 
     if rdspass.empty? and password.empty?
       # No pass collected, no point to store anything
-      print_error("#{peer} - No passwords found")
+      print_error("No passwords found")
       return
     end
 
-    print_good("#{peer} - rdspassword = #{rdspass}")
-    print_good("#{peer} - password    = #{password}")
-    print_good("#{peer} - encrypted   = #{encrypted}")
+    print_good("rdspassword = #{rdspass}")
+    print_good("password    = #{password}")
+    print_good("encrypted   = #{encrypted}")
 
     p = store_loot('coldfusion.password.properties', 'text/plain', rhost, res.body)
-    print_good("#{peer} - password.properties stored in '#{p}'")
+    print_good("password.properties stored in '#{p}'")
   end
 end

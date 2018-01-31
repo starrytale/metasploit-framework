@@ -1,15 +1,12 @@
 ##
-# This module requires Metasploit: http://metasploit.com/download
+# This module requires Metasploit: https://metasploit.com/download
 # Current source: https://github.com/rapid7/metasploit-framework
 ##
 
-require 'msf/core'
-require 'rex'
 require 'net/https'
 require 'uri'
 
-class Metasploit4 < Msf::Auxiliary
-
+class MetasploitModule < Msf::Auxiliary
   include Msf::Exploit::Remote::HttpClient
   include Msf::Auxiliary::Report
 
@@ -18,7 +15,7 @@ class Metasploit4 < Msf::Auxiliary
       'Name' => 'Shodan Search',
       'Description' => %q{
         This module uses the Shodan API to search Shodan. Accounts are free
-        and an API key is required to used this module. Output from the module
+        and an API key is required to use this module. Output from the module
         is displayed to the screen and can be saved to a file or the MSF database.
         NOTE: SHODAN filters (i.e. port, hostname, os, geo, city) can be used in
         queries, but there are limitations when used with a free API key. Please
@@ -48,7 +45,7 @@ class Metasploit4 < Msf::Auxiliary
         OptInt.new('MAXPAGE', [true, 'Max amount of pages to collect', 1]),
         OptRegexp.new('REGEX', [true, 'Regex search for a specific IP/City/Country/Hostname', '.*'])
 
-      ], self.class)
+      ])
   end
 
   # create our Shodan query function that performs the actual web request
@@ -144,7 +141,7 @@ class Metasploit4 < Msf::Auxiliary
     end
 
     # Save the results to this table
-    tbl = Rex::Ui::Text::Table.new(
+    tbl = Rex::Text::Table.new(
       'Header'  => 'Search Results',
       'Indent'  => 1,
       'Columns' => ['IP:Port', 'City', 'Country', 'Hostname']

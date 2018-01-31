@@ -15,6 +15,7 @@ module Msf
 ###
 class Module
   autoload :Arch, 'msf/core/module/arch'
+  autoload :Auth, 'msf/core/module/auth'
   autoload :Author, 'msf/core/module/author'
   autoload :AuxiliaryAction, 'msf/core/module/auxiliary_action'
   autoload :Compatibility, 'msf/core/module/compatibility'
@@ -40,6 +41,7 @@ class Module
   autoload :UUID, 'msf/core/module/uuid'
 
   include Msf::Module::Arch
+  include Msf::Module::Auth
   include Msf::Module::Author
   include Msf::Module::Compatibility
   include Msf::Module::DataStore
@@ -266,11 +268,10 @@ class Module
   end
 
   #
-  # Returns true if this module is being debugged.  The debug flag is set
-  # by setting datastore['DEBUG'] to 1|true|yes
+  # Returns true if this module is being debugged.
   #
   def debugging?
-    (datastore['DEBUG'] || '') =~ /^(1|t|y)/i
+    datastore['DEBUG']
   end
 
   #

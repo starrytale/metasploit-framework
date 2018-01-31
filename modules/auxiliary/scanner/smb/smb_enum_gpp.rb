@@ -1,12 +1,11 @@
 ##
-# This module requires Metasploit: http://metasploit.com/download
+# This module requires Metasploit: https://metasploit.com/download
 # Current source: https://github.com/rapid7/metasploit-framework
 ##
 
-require 'msf/core'
 require 'rex/parser/group_policy_preferences'
 
-class Metasploit3 < Msf::Auxiliary
+class MetasploitModule < Msf::Auxiliary
   include Msf::Exploit::Remote::SMB::Client::Authenticated
   include Msf::Auxiliary::Scanner
   include Msf::Auxiliary::Report
@@ -43,7 +42,7 @@ class Metasploit3 < Msf::Auxiliary
       OptString.new('SMBSHARE', [true, 'The name of the share on the server', 'SYSVOL']),
       OptString.new('RPORT', [true, 'The Target port', 445]),
       OptBool.new('STORE', [true, 'Store the enumerated files in loot.', true])
-    ], self.class)
+    ])
   end
 
   def check_path(ip, path)
@@ -62,11 +61,11 @@ class Metasploit3 < Msf::Auxiliary
       when 'STATUS_OBJECT_PATH_NOT_FOUND'
         vprint_error("Object PATH \\\\#{ip}\\#{datastore['SMBSHARE']}\\#{path} NOT found!")
       when 'STATUS_ACCESS_DENIED'
-       vprint_error("Host #{ip} reports access denied.")
+       vprint_error("Host reports access denied.")
       when 'STATUS_BAD_NETWORK_NAME'
-        vprint_error("Host #{ip} is NOT connected to #{datastore['SMBDomain']}!")
+        vprint_error("Host is NOT connected to #{datastore['SMBDomain']}!")
       when 'STATUS_INSUFF_SERVER_RESOURCES'
-        vprint_error("Host #{ip} rejected with insufficient resources!")
+        vprint_error("Host rejected with insufficient resources!")
       when 'STATUS_OBJECT_NAME_INVALID'
         vprint_error("opening \\#{path} bad filename")
       else
@@ -131,7 +130,7 @@ class Metasploit3 < Msf::Auxiliary
     results.each do |result|
       if datastore['STORE']
         stored_path = store_loot('windows.gpp.xml', 'text/plain', ip, xml_file[:xml], file_type, xml_file[:path])
-        print_status("XML file saved to: #{stored_path}")
+        print_good("XML file saved to: #{stored_path}")
       end
 
       report_creds(ip, result[:USER], result[:PASS])

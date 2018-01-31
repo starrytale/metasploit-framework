@@ -1,12 +1,9 @@
 ##
-# This module requires Metasploit: http://metasploit.com/download
+# This module requires Metasploit: https://metasploit.com/download
 # Current source: https://github.com/rapid7/metasploit-framework
 ##
 
-require 'msf/core'
-
-class Metasploit3 < Msf::Auxiliary
-
+class MetasploitModule < Msf::Auxiliary
   include Msf::Exploit::Remote::Tcp
   include Msf::Auxiliary::Report
   include Msf::Auxiliary::AuthBrute
@@ -38,7 +35,7 @@ class Metasploit3 < Msf::Auxiliary
         Opt::RPORT(513),
         OptString.new('TERM',  [ true, 'The terminal type desired', 'vt100' ]),
         OptString.new('SPEED', [ true, 'The terminal speed desired', '9600' ])
-      ], self.class)
+      ])
   end
 
   def run_host(ip)
@@ -332,5 +329,4 @@ class Metasploit3 < Msf::Auxiliary
     start_session(self, info, merge_me)
 
   end
-
 end

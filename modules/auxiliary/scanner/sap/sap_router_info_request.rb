@@ -1,5 +1,5 @@
 ##
-# This module requires Metasploit: http://metasploit.com/download
+# This module requires Metasploit: https://metasploit.com/download
 # Current source: https://github.com/rapid7/metasploit-framework
 ##
 
@@ -20,10 +20,7 @@
 # just seem to enjoy hacking SAP :)
 ##
 
-require 'msf/core'
-
-class Metasploit4 < Msf::Auxiliary
-
+class MetasploitModule < Msf::Auxiliary
   include Msf::Exploit::Remote::Tcp
   include Msf::Auxiliary::Report
   include Msf::Auxiliary::Scanner
@@ -49,7 +46,7 @@ class Metasploit4 < Msf::Auxiliary
     register_options(
       [
         Opt::RPORT(3299)
-      ], self.class)
+      ])
   end
 
   def get_data(size, packet_len)
@@ -109,7 +106,11 @@ class Metasploit4 < Msf::Auxiliary
       print_good("#{host_port} - Connected to saprouter")
       print_good("#{host_port} - Sending ROUTER_ADM packet info request")
       sock.put(ni_packet)
-      packet_len = sock.read(4).unpack('H*')[0].to_i 16
+      sock_res = sock.read(4)
+      unless sock_res
+        fail_with(Failure::Unknown, 'Unable to get the packet length')
+      end
+      packet_len = sock_res.unpack('H*')[0].to_i 16
       print_good("#{host_port} - Got INFO response")
       while packet_len !=0
         count += 1

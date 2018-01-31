@@ -1,13 +1,11 @@
 ##
-# This module requires Metasploit: http://metasploit.com/download
+# This module requires Metasploit: https://metasploit.com/download
 # Current source: https://github.com/rapid7/metasploit-framework
-###
+##
 
-require 'msf/core'
 require 'msf/core/exploit/format/webarchive'
 
-class Metasploit3 < Msf::Auxiliary
-
+class MetasploitModule < Msf::Auxiliary
   include Msf::Exploit::Remote::FtpServer
   include Msf::Exploit::Format::Webarchive
   include Msf::Auxiliary::Report
@@ -45,7 +43,7 @@ class Metasploit3 < Msf::Auxiliary
       OptString.new("URIPATH", [false, 'The URI to use for this exploit (default is random)']),
       OptPort.new('SRVPORT',   [true, "The local port to use for the FTP server", 8081]),
       OptPort.new('HTTPPORT',  [true, "The HTTP server port", 8080])
-    ], self.class)
+    ])
   end
 
   def lookup_lhost(c=nil)
@@ -286,7 +284,7 @@ class Metasploit3 < Msf::Auxiliary
   # set.
   #
   def use_zlib
-    if (!Rex::Text.zlib_present? and datastore['HTTP::compression'] == true)
+    if !Rex::Text.zlib_present? && datastore['HTTP::compression']
       fail_with(Failure::Unknown, "zlib support was not detected, yet the HTTP::compression option was set.  Don't do that!")
     end
   end
@@ -342,5 +340,4 @@ class Metasploit3 < Msf::Auxiliary
     rescue
     end
   end
-
 end

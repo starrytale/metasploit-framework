@@ -1,9 +1,8 @@
 ##
-# This module requires Metasploit: http://metasploit.com/download
+# This module requires Metasploit: https://metasploit.com/download
 # Current source: https://github.com/rapid7/metasploit-framework
 ##
 
-require 'msf/core'
 require 'rex/proto/ntlm/constants'
 require 'rex/proto/ntlm/message'
 require 'rex/proto/ntlm/crypt'
@@ -12,8 +11,7 @@ NTLM_CONST = Rex::Proto::NTLM::Constants
 NTLM_CRYPT = Rex::Proto::NTLM::Crypt
 MESSAGE = Rex::Proto::NTLM::Message
 
-class Metasploit3 < Msf::Auxiliary
-
+class MetasploitModule < Msf::Auxiliary
   include Msf::Exploit::Remote::TcpServer
   include Msf::Exploit::Remote::SMB::Server
   include Msf::Auxiliary::Report
@@ -50,13 +48,13 @@ class Metasploit3 < Msf::Auxiliary
         OptString.new('CAINPWFILE',  [ false, "The local filename to store the hashes in Cain&Abel format", nil ]),
         OptString.new('JOHNPWFILE',  [ false, "The prefix to the local filename to store the hashes in JOHN format", nil ]),
         OptString.new('CHALLENGE',   [ true, "The 8 byte challenge ", "1122334455667788" ])
-      ], self.class)
+      ])
 
     register_advanced_options(
       [
         OptBool.new("SMB_EXTENDED_SECURITY", [ true, "Use smb extended security negociation, when set client will use ntlmssp, if not then client will use classic lanman authentification", false ]),
         OptString.new('DOMAIN_NAME',         [ true, "The domain name used during smb exchange with smb extended security set ", "anonymous" ])
-      ], self.class)
+      ])
 
   end
 

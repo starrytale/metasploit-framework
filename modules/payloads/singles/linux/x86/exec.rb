@@ -1,9 +1,7 @@
 ##
-# This module requires Metasploit: http://metasploit.com/download
+# This module requires Metasploit: https://metasploit.com/download
 # Current source: https://github.com/rapid7/metasploit-framework
 ##
-
-require 'msf/core'
 
 ###
 #
@@ -13,7 +11,7 @@ require 'msf/core'
 # Executes an arbitrary command.
 #
 ###
-module Metasploit3
+module MetasploitModule
 
   CachedSize = 43
 
@@ -33,7 +31,7 @@ module Metasploit3
     register_options(
       [
         OptString.new('CMD',  [ true,  "The command string to execute" ]),
-      ], self.class)
+      ])
   end
 
   #
@@ -47,5 +45,4 @@ module Metasploit3
       Rex::Arch::X86.call(cmd.length + 1) + cmd + "\x00"     +
       "\x57\x53\x89\xe1\xcd\x80"
   end
-
 end

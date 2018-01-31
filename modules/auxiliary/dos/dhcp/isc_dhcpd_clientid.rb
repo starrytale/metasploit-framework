@@ -1,12 +1,9 @@
 ##
-# This module requires Metasploit: http://metasploit.com/download
+# This module requires Metasploit: https://metasploit.com/download
 # Current source: https://github.com/rapid7/metasploit-framework
 ##
 
-require 'msf/core'
-
-class Metasploit3 < Msf::Auxiliary
-
+class MetasploitModule < Msf::Auxiliary
   include Msf::Auxiliary::Dos
   include Msf::Exploit::Capture
 
@@ -66,5 +63,4 @@ class Metasploit3 < Msf::Auxiliary
     req[28,6] = chaddr
     req + payload
   end
-
 end

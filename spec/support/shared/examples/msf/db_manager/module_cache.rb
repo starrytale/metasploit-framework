@@ -1,4 +1,4 @@
-shared_examples_for 'Msf::DBManager::ModuleCache' do
+RSpec.shared_examples_for 'Msf::DBManager::ModuleCache' do
   it { is_expected.to respond_to :match_values }
   it { is_expected.to respond_to :module_to_details_hash }
   it { is_expected.to respond_to :modules_cached }
@@ -26,8 +26,8 @@ shared_examples_for 'Msf::DBManager::ModuleCache' do
       )
     end
 
-    before(:each) do
-      db_manager.stub(:migrated => migrated)
+    before(:example) do
+      allow(db_manager).to receive(:migrated).and_return(migrated)
     end
 
     context 'with migrated' do
@@ -39,8 +39,8 @@ shared_examples_for 'Msf::DBManager::ModuleCache' do
         false
       end
 
-      before(:each) do
-        db_manager.stub(:modules_caching => modules_caching)
+      before(:example) do
+        allow(db_manager).to receive(:modules_caching).and_return(modules_caching)
       end
 
       context 'with modules_caching' do
@@ -96,8 +96,8 @@ shared_examples_for 'Msf::DBManager::ModuleCache' do
       )
     end
 
-    before(:each) do
-      db_manager.stub(:migrated => migrated)
+    before(:example) do
+      allow(db_manager).to receive(:migrated).and_return(migrated)
     end
 
     context 'with migrated' do
@@ -157,7 +157,7 @@ shared_examples_for 'Msf::DBManager::ModuleCache' do
         "app:#{app}"
       end
 
-      before(:each) do
+      before(:example) do
         Mdm::Module::Detail::STANCES.each do |stance|
           FactoryGirl.create(:mdm_module_detail, :stance => stance)
         end
@@ -169,11 +169,13 @@ shared_examples_for 'Msf::DBManager::ModuleCache' do
         end
 
         it "should match Mdm::Module::Detail#stance 'passive'" do
-          module_details.count.should > 0
+          expect(module_details.count).to be > 0
 
-          module_details.all? { |module_detail|
-            module_detail.stance == 'passive'
-          }.should be_truthy
+          expect(
+            module_details.all? { |module_detail|
+              module_detail.stance == 'passive'
+            }
+          ).to eq true
         end
       end
 
@@ -183,11 +185,13 @@ shared_examples_for 'Msf::DBManager::ModuleCache' do
         end
 
         it "should match Mdm::Module::Detail#stance 'aggressive'" do
-          module_details.count.should > 0
+          expect(module_details.count).to be > 0
 
-          module_details.all? { |module_detail|
-            module_detail.stance == 'aggressive'
-          }.should be_truthy
+          expect(
+            module_details.all? { |module_detail|
+              module_detail.stance == 'aggressive'
+            }
+          ).to eq true
         end
       end
     end
@@ -212,13 +216,15 @@ shared_examples_for 'Msf::DBManager::ModuleCache' do
         end
 
         it 'should match Mdm::Module::Author#email' do
-          module_details.count.should > 0
+          expect(module_details.count).to be > 0
 
-          module_details.all? { |module_detail|
-            module_detail.authors.any? { |module_author|
-              module_author.email == target_module_author.email
+          expect(
+            module_details.all? { |module_detail|
+              module_detail.authors.any? { |module_author|
+                module_author.email == target_module_author.email
+              }
             }
-          }.should be_truthy
+          ).to eq true
         end
       end
 
@@ -229,13 +235,15 @@ shared_examples_for 'Msf::DBManager::ModuleCache' do
         end
 
         it 'should match Mdm::Module::Author#name' do
-          module_details.count.should > 0
+          expect(module_details.count).to be > 0
 
-          module_details.all? { |module_detail|
-            module_detail.authors.any? { |module_author|
-              module_author.name == target_module_author.name
+          expect(
+            module_details.all? { |module_detail|
+              module_detail.authors.any? { |module_author|
+                module_author.name == target_module_author.name
+              }
             }
-          }.should be_truthy
+          ).to eq true
         end
       end
     end
@@ -263,11 +271,13 @@ shared_examples_for 'Msf::DBManager::ModuleCache' do
         end
 
         it 'should match Mdm::Module::Detail#fullname' do
-          module_details.count.should > 0
+          expect(module_details.count).to be > 0
 
-          module_details.all? { |module_detail|
-            module_detail.fullname == target_module_detail.fullname
-          }.should be_truthy
+          expect(
+            module_details.all? { |module_detail|
+              module_detail.fullname == target_module_detail.fullname
+            }
+          ).to eq true
         end
       end
 
@@ -278,18 +288,18 @@ shared_examples_for 'Msf::DBManager::ModuleCache' do
         end
 
         it 'should match Mdm::Module::Detail#name' do
-          module_details.count.should > 0
+          expect(module_details.count).to be > 0
 
-          module_details.all? { |module_detail|
-            module_detail.name == target_module_detail.name
-          }.should be_truthy
+          expect(
+            module_details.all? { |module_detail|
+              module_detail.name == target_module_detail.name
+            }
+          ).to eq true
         end
       end
     end
 
     it_should_behave_like 'Msf::DBManager#search_modules Mdm::Module::Platform#name or Mdm::Module::Target#name keyword', :os
-
-    it_should_behave_like 'Msf::DBManager#search_modules Mdm::Module::Ref#name keyword', :osvdb
 
     it_should_behave_like 'Msf::DBManager#search_modules Mdm::Module::Platform#name or Mdm::Module::Target#name keyword', :platform
 
@@ -313,19 +323,21 @@ shared_examples_for 'Msf::DBManager::ModuleCache' do
         end
 
         it 'should match Mdm::Module::Ref#name' do
-          module_details.count.should > 0
+          expect(module_details.count).to be > 0
 
-          module_details.all? { |module_detail|
-            module_detail.refs.any? { |module_ref|
-              module_ref.name == ref
+          expect(
+            module_details.all? { |module_detail|
+              module_detail.refs.any? { |module_ref|
+                module_ref.name == ref
+              }
             }
-          }.should be_truthy
+          ).to eq true
         end
       end
 
       context 'without Mdm::Module::Ref#name' do
         it 'should not match Mdm::Module::Ref#name' do
-          module_details.count.should == 0
+          expect(module_details.count).to eq 0
         end
       end
     end
@@ -353,17 +365,19 @@ shared_examples_for 'Msf::DBManager::ModuleCache' do
         end
 
         it 'should match Mdm::Module::Detail#mtype' do
-          module_details.count.should > 0
+          expect(module_details.count).to be > 0
 
-          module_details.all? { |module_detail|
-            module_detail.mtype == type
-          }.should be_truthy
+          expect(
+            module_details.all? { |module_detail|
+              module_detail.mtype == type
+            }
+          ).to eq true
         end
       end
 
       context 'without Mdm::Module::Detail#mtype' do
         it 'should not match Mdm::Module::Detail#mtype' do
-          module_details.count.should == 0
+          expect(module_details.count).to eq 0
         end
       end
     end
@@ -379,13 +393,15 @@ shared_examples_for 'Msf::DBManager::ModuleCache' do
         end
 
         it 'should match Mdm::Module::Action#name' do
-          module_details.count.should > 0
+          expect(module_details.count).to be > 0
 
-          module_details.all? { |module_detail|
-            module_detail.actions.any? { |module_action|
-              module_action.name == search_string
+          expect(
+            module_details.all? { |module_detail|
+              module_detail.actions.any? { |module_action|
+                module_action.name == search_string
+              }
             }
-          }.should be_truthy
+          ).to eq true
         end
       end
 
@@ -399,13 +415,15 @@ shared_examples_for 'Msf::DBManager::ModuleCache' do
         end
 
         it 'should match Mdm::Module::Arch#name' do
-          module_details.count.should > 0
+          expect(module_details.count).to be > 0
 
-          module_details.all? { |module_detail|
-            module_detail.archs.any? { |module_arch|
-              module_arch.name == search_string
+          expect(
+            module_details.all? { |module_detail|
+              module_detail.archs.any? { |module_arch|
+                module_arch.name == search_string
+              }
             }
-          }.should be_truthy
+          ).to eq true
         end
       end
 
@@ -419,13 +437,15 @@ shared_examples_for 'Msf::DBManager::ModuleCache' do
         end
 
         it 'should match Mdm::Module::Author#name' do
-          module_details.count.should > 0
+          expect(module_details.count).to be > 0
 
-          module_details.all? { |module_detail|
-            module_detail.authors.any? { |module_author|
-              module_author.name == search_string
+          expect(
+            module_details.all? { |module_detail|
+              module_detail.authors.any? { |module_author|
+                module_author.name == search_string
+              }
             }
-          }.should be_truthy
+          ).to eq true
         end
       end
 
@@ -445,11 +465,13 @@ shared_examples_for 'Msf::DBManager::ModuleCache' do
           end
 
           it 'should match Mdm::Module::Detail#description' do
-            module_details.count.should == 1
+            expect(module_details.count).to eq 1
 
-            module_details.all? { |module_detail|
-              module_detail.description == target_module_detail.description
-            }.should be_truthy
+            expect(
+              module_details.all? { |module_detail|
+                module_detail.description == target_module_detail.description
+              }
+            ).to eq true
           end
         end
 
@@ -459,11 +481,13 @@ shared_examples_for 'Msf::DBManager::ModuleCache' do
           end
 
           it 'should match Mdm::Module::Detail#fullname' do
-            module_details.count.should == 1
+            expect(module_details.count).to eq 1
 
-            module_details.all? { |module_detail|
-              module_detail.fullname == search_string
-            }.should be_truthy
+            expect(
+              module_details.all? { |module_detail|
+                module_detail.fullname == search_string
+              }
+            ).to eq true
           end
         end
 
@@ -474,11 +498,13 @@ shared_examples_for 'Msf::DBManager::ModuleCache' do
           end
 
           it 'should match Mdm::Module::Detail#name' do
-            module_details.count.should == 1
+            expect(module_details.count).to eq 1
 
-            module_details.all? { |module_detail|
-              module_detail.name == target_module_detail.name
-            }.should be_truthy
+            expect(
+              module_details.all? { |module_detail|
+                module_detail.name == target_module_detail.name
+              }
+            ).to eq true
           end
         end
       end
@@ -493,13 +519,15 @@ shared_examples_for 'Msf::DBManager::ModuleCache' do
         end
 
         it 'should match Mdm::Module::Platform#name' do
-          module_details.count.should > 0
+          expect(module_details.count).to be > 0
 
-          module_details.all? { |module_detail|
-            module_detail.platforms.any? { |module_platform|
-              module_platform.name == search_string
+          expect(
+            module_details.all? { |module_detail|
+              module_detail.platforms.any? { |module_platform|
+                module_platform.name == search_string
+              }
             }
-          }.should be_truthy
+          ).to eq true
         end
       end
 
@@ -513,13 +541,15 @@ shared_examples_for 'Msf::DBManager::ModuleCache' do
         end
 
         it 'should match Mdm::Module::Ref#name' do
-          module_details.count.should > 0
+          expect(module_details.count).to be > 0
 
-          module_details.all? { |module_detail|
-            module_detail.refs.any? { |module_ref|
-              module_ref.name == search_string
+          expect(
+            module_details.all? { |module_detail|
+              module_detail.refs.any? { |module_ref|
+                module_ref.name == search_string
+              }
             }
-          }.should be_truthy
+          ).to eq true
         end
       end
 
@@ -533,13 +563,15 @@ shared_examples_for 'Msf::DBManager::ModuleCache' do
         end
 
         it 'should match Mdm::Module::Target#name' do
-          module_details.count.should > 0
+          expect(module_details.count).to be > 0
 
-          module_details.all? { |module_detail|
-            module_detail.targets.any? { |module_target|
-              module_target.name == search_string
+          expect(
+            module_details.all? { |module_detail|
+              module_detail.targets.any? { |module_target|
+                module_target.name == search_string
+              }
             }
-          }.should be_truthy
+          ).to eq true
         end
       end
     end
@@ -554,8 +586,8 @@ shared_examples_for 'Msf::DBManager::ModuleCache' do
       false
     end
 
-    before(:each) do
-      db_manager.stub(:migrated => migrated)
+    before(:example) do
+      allow(db_manager).to receive(:migrated).and_return(migrated)
     end
 
     context 'with migrated' do
@@ -567,13 +599,13 @@ shared_examples_for 'Msf::DBManager::ModuleCache' do
         true
       end
 
-      before(:each) do
-        db_manager.stub(:modules_caching => modules_caching)
+      before(:example) do
+        allow(db_manager).to receive(:modules_caching).and_return(modules_caching)
       end
 
       context 'with modules_caching' do
         it 'should not update module details' do
-          db_manager.should_not_receive(:update_module_details)
+          expect(db_manager).not_to receive(:update_module_details)
 
           update_all_module_details
         end
@@ -585,22 +617,22 @@ shared_examples_for 'Msf::DBManager::ModuleCache' do
         end
 
         it 'should set framework.cache_thread to current thread and then nil' do
-          framework.should_receive(:cache_thread=).with(Thread.current).ordered
-          framework.should_receive(:cache_thread=).with(nil).ordered
+          expect(framework).to receive(:cache_thread=).with(Thread.current).ordered
+          expect(framework).to receive(:cache_thread=).with(nil).ordered
 
           update_all_module_details
         end
 
         it 'should set modules_cached to false and then true' do
-          db_manager.should_receive(:modules_cached=).with(false).ordered
-          db_manager.should_receive(:modules_cached=).with(true).ordered
+          expect(db_manager).to receive(:modules_cached=).with(false).ordered
+          expect(db_manager).to receive(:modules_cached=).with(true).ordered
 
           update_all_module_details
         end
 
         it 'should set modules_caching to true and then false' do
-          db_manager.should_receive(:modules_caching=).with(true).ordered
-          db_manager.should_receive(:modules_caching=).with(false).ordered
+          expect(db_manager).to receive(:modules_caching=).with(true).ordered
+          expect(db_manager).to receive(:modules_caching=).with(false).ordered
 
           update_all_module_details
         end
@@ -658,7 +690,7 @@ shared_examples_for 'Msf::DBManager::ModuleCache' do
               context 'with existing Mdm::Module::Detail#file' do
                 context 'with same Mdm::Module::Detail#mtime and File.mtime' do
                   it 'should not update module details' do
-                    db_manager.should_not_receive(:update_module_details)
+                    expect(db_manager).not_to receive(:update_module_details)
 
                     update_all_module_details
                   end
@@ -668,7 +700,7 @@ shared_examples_for 'Msf::DBManager::ModuleCache' do
                   let(:modification_time) do
                     # +1 as rand can return 0 and the time must be different for
                     # this context.
-                    super() - (rand(1.day) + 1)
+                    1.days.ago
                   end
 
                   it_should_behave_like 'Msf::DBManager#update_all_module_details refresh'
@@ -689,7 +721,7 @@ shared_examples_for 'Msf::DBManager::ModuleCache' do
                 end
 
                 it 'should not update module details' do
-                  db_manager.should_not_receive(:update_module_details)
+                  expect(db_manager).not_to receive(:update_module_details)
 
                   update_all_module_details
                 end
@@ -702,7 +734,7 @@ shared_examples_for 'Msf::DBManager::ModuleCache' do
 
     context 'without migrated' do
       it 'should not update module details' do
-        db_manager.should_not_receive(:update_module_details)
+        expect(db_manager).not_to receive(:update_module_details)
 
         update_all_module_details
       end
@@ -770,8 +802,8 @@ shared_examples_for 'Msf::DBManager::ModuleCache' do
       'exploits'
     end
 
-    before(:each) do
-      db_manager.stub(:migrated => migrated)
+    before(:example) do
+      allow(db_manager).to receive(:migrated).and_return(migrated)
     end
 
     context 'with migrated' do
@@ -780,7 +812,7 @@ shared_examples_for 'Msf::DBManager::ModuleCache' do
       end
 
       it 'should call module_to_details_hash to get Mdm::Module::Detail attributes and association attributes' do
-        db_manager.should_receive(:module_to_details_hash).and_call_original
+        expect(db_manager).to receive(:module_to_details_hash).and_call_original
 
         update_module_details
       end
@@ -815,8 +847,8 @@ shared_examples_for 'Msf::DBManager::ModuleCache' do
           FactoryGirl.generate :mdm_module_detail_stance
         end
 
-        before(:each) do
-          db_manager.stub(
+        before(:example) do
+          allow(db_manager).to receive(
               :module_to_details_hash
           ).with(
               module_instance
@@ -830,7 +862,7 @@ shared_examples_for 'Msf::DBManager::ModuleCache' do
             Mdm::Module::Detail.last
           end
 
-          before(:each) do
+          before(:example) do
             update_module_details
           end
 
@@ -847,7 +879,7 @@ shared_examples_for 'Msf::DBManager::ModuleCache' do
             []
           end
 
-          before(:each) do
+          before(:example) do
             module_to_details_hash[:bits] = bits
           end
 
@@ -880,7 +912,7 @@ shared_examples_for 'Msf::DBManager::ModuleCache' do
                 Mdm::Module::Detail.last
               end
 
-              before(:each) do
+              before(:example) do
                 update_module_details
               end
 
@@ -917,7 +949,7 @@ shared_examples_for 'Msf::DBManager::ModuleCache' do
                 Mdm::Module::Detail.last
               end
 
-              before(:each) do
+              before(:example) do
                 update_module_details
               end
 
@@ -959,7 +991,7 @@ shared_examples_for 'Msf::DBManager::ModuleCache' do
                 Mdm::Module::Detail.last
               end
 
-              before(:each) do
+              before(:example) do
                 update_module_details
               end
 
@@ -997,7 +1029,7 @@ shared_examples_for 'Msf::DBManager::ModuleCache' do
                 Mdm::Module::Detail.last
               end
 
-              before(:each) do
+              before(:example) do
                 update_module_details
               end
 
@@ -1034,7 +1066,7 @@ shared_examples_for 'Msf::DBManager::ModuleCache' do
                 Mdm::Module::Detail.last
               end
 
-              before(:each) do
+              before(:example) do
                 update_module_details
               end
 
@@ -1076,7 +1108,7 @@ shared_examples_for 'Msf::DBManager::ModuleCache' do
                 Mdm::Module::Detail.last
               end
 
-              before(:each) do
+              before(:example) do
                 update_module_details
               end
 

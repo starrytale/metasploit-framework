@@ -1,9 +1,7 @@
 ##
-# This module requires Metasploit: http://metasploit.com/download
+# This module requires Metasploit: https://metasploit.com/download
 # Current source: https://github.com/rapid7/metasploit-framework
 ##
-
-require 'msf/core'
 
 require 'rex/proto/ntlm/constants'
 require 'rex/proto/ntlm/message'
@@ -15,8 +13,7 @@ NTLM_CONST = Rex::Proto::NTLM::Constants
 NTLM_CRYPT = Rex::Proto::NTLM::Crypt
 MESSAGE = Rex::Proto::NTLM::Message
 
-class Metasploit3 < Msf::Auxiliary
-
+class MetasploitModule < Msf::Auxiliary
   include Msf::Exploit::Remote::HttpClient
   include Msf::Exploit::Remote::HttpServer::HTML
   include Msf::Auxiliary::Report
@@ -67,7 +64,7 @@ class Metasploit3 < Msf::Auxiliary
       OptPath.new('SYNCFILE', [false, "Local Ruby file to eval dynamically" ]),
       OptString.new('SYNCID', [false, "ID to identify a request saved to db" ]),
 
-    ], self.class)
+    ])
 
     register_advanced_options([
       OptPath.new('RESPPAGE', [false,
@@ -76,7 +73,7 @@ class Metasploit3 < Msf::Auxiliary
         'File specifying extra HTTP_* headers (cookies, multipart, etc.)', nil]),
       OptString.new('SMB_SHARES', [false, 'The shares to check with SMB_ENUM',
               'IPC$,ADMIN$,C$,D$,CCMLOGS$,ccmsetup$,share,netlogon,sysvol'])
-    ], self.class)
+    ])
 
     deregister_options('DOMAIN', 'NTLM::SendLM', 'NTLM::SendSPN', 'NTLM::SendNTLM', 'NTLM::UseLMKey',
       'NTLM::UseNTLM2_session', 'NTLM::UseNTLMv2')
@@ -308,9 +305,9 @@ class Metasploit3 < Msf::Auxiliary
       if resp.code == 401
         print_error("Auth not successful, returned a 401")
       else
-        print_status("Auth successful, saving server response in database")
+        print_good("Auth successful, saving server response in database")
       end
-      vprint_status(resp)
+      vprint_status(resp.to_s)
     end
     return [resp, ser_sock]
   end
@@ -641,7 +638,7 @@ class Metasploit3 < Msf::Auxiliary
     elsif nt_len == 0
       print_status("Empty hash from #{host} captured, ignoring ... ")
     else
-      print_status("Unknow hash type from #{host}, ignoring ...")
+      print_status("Unknown hash type from #{host}, ignoring ...")
     end
 
     arg[:host] = host

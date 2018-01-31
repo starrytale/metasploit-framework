@@ -1,14 +1,12 @@
 ##
-# This module requires Metasploit: http://metasploit.com/download
+# This module requires Metasploit: https://metasploit.com/download
 # Current source: https://github.com/rapid7/metasploit-framework
 ##
 
-
-require 'msf/core'
 require 'msf/core/handler/bind_tcp'
 require 'msf/core/payload/windows/bind_tcp'
 
-module Metasploit4
+module MetasploitModule
 
   CachedSize = 318
 
@@ -40,5 +38,4 @@ module Metasploit4
   def include_send_uuid
     true
   end
-
 end

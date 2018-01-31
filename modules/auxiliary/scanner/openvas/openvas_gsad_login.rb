@@ -1,12 +1,9 @@
 ##
-# This module requires Metasploit: http://metasploit.com/download
+# This module requires Metasploit: https://metasploit.com/download
 # Current source: https://github.com/rapid7/metasploit-framework
 ##
 
-require 'msf/core'
-
-class Metasploit3 < Msf::Auxiliary
-
+class MetasploitModule < Msf::Auxiliary
   include Msf::Exploit::Remote::HttpClient
   include Msf::Auxiliary::Report
   include Msf::Auxiliary::AuthBrute
@@ -15,13 +12,14 @@ class Metasploit3 < Msf::Auxiliary
 
   def initialize
     super(
-      'Name'        => 'OpenVAS gsad Web Interface Login Utility',
-      'Description' => %q{
-        This module simply attempts to login to a OpenVAS gsad interface
+      'Name'           => 'OpenVAS gsad Web Interface Login Utility',
+      'Description'    => %q{
+        This module simply attempts to login to an OpenVAS gsad interface
         using a specific user/pass.
       },
-      'Author'      => [ 'Vlatko Kosturjak <kost[at]linux.hr>' ],
-      'License'     => MSF_LICENSE
+      'Author'         => [ 'Vlatko Kosturjak <kost[at]linux.hr>' ],
+      'License'        => MSF_LICENSE,
+      'DefaultOptions' => { 'SSL' => true }
     )
 
     register_options(
@@ -29,14 +27,13 @@ class Metasploit3 < Msf::Auxiliary
         Opt::RPORT(443),
         OptString.new('URI', [true, "URI for OpenVAS omp login. Default is /omp", "/omp"]),
         OptBool.new('BLANK_PASSWORDS', [false, "Try blank passwords for all users", false]),
-        OptBool.new('SSL', [ true, "Negotiate SSL for outgoing connections", true])
-      ], self.class)
+      ])
 
     register_advanced_options(
     [
       OptString.new('OMP_text', [true, "value for OpenVAS omp text login hidden field", "/omp?cmd=get_tasks&amp;overrides=1"]),
       OptString.new('OMP_cmd', [true, "value for OpenVAS omp cmd login hidden field", "login"])
-    ], self.class)
+    ])
   end
 
   def run_host(ip)

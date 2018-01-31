@@ -1,11 +1,11 @@
 ##
-# This module requires Metasploit: http://metasploit.com/download
+# This module requires Metasploit: https://metasploit.com/download
 # Current source: https://github.com/rapid7/metasploit-framework
 ##
 
 require 'rex/parser/fs/ntfs'
 
-class Metasploit3 < Msf::Post
+class MetasploitModule < Msf::Post
   include Msf::Post::Windows::Priv
   include Msf::Post::Windows::Error
 
@@ -31,7 +31,7 @@ class Metasploit3 < Msf::Post
     register_options(
       [
         OptString.new('FILE_PATH', [true, 'The FILE_PATH to retreive from the Volume raw device', nil])
-      ], self.class)
+      ])
   end
 
   def run
@@ -69,7 +69,7 @@ class Metasploit3 < Msf::Post
     end
 
     @handle = r['return']
-    vprint_status("Successfuly opened #{drive}")
+    vprint_good("Successfuly opened #{drive}")
     begin
       @bytes_read = 0
       fs = Rex::Parser::NTFS.new(self)
